@@ -7,6 +7,7 @@ class filesound():
 		self.channels = 1
 		self.format = pyaudio.paInt16
 		self.rate = 44100
+		self.frames = 0
 
 
 def record():
@@ -14,7 +15,7 @@ def record():
 	FORMAT = pyaudio.paInt16 #paInt8
 	CHANNELS = 1 
 	RATE = 44100 #sample rate
-	RECORD_SECONDS = 5
+	RECORD_SECONDS = 2
 	WAVE_OUTPUT_FILENAME = "output.wav"
 
 	p = pyaudio.PyAudio()
@@ -38,15 +39,13 @@ def record():
 	stream.stop_stream()
 	stream.close()
 	p.terminate()
-	return p
+	return frames
 	#wf = wave.open(WAVE_OUTPUT_FILENAME, 'wb')
 	#wf.setnchannels(CHANNELS)
 	#wf.setsampwidth(p.get_sample_size(FORMAT))
 	#wf.setframerate(RATE)
 	#wf.writeframes(b''.join(frames))
 	#wf.close()
-
-	return
 
 def save(name, file):
 	pass
