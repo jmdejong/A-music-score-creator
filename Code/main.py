@@ -9,26 +9,6 @@ def initialize():
     global soundfile
     soundfile = filesound()
 
-class PanelBar(wx.Panel):
-    def __init__(self, parent):
-        """Constructor"""
-        wx.Panel.__init__(self, parent = parent)
-
-        self.txtOne = wx.StaticText(self, -1, label = "piradoba", pos = (20,10))
-        self.txtPlace = wx.TextCtrl(self, pos = (20,30))
-        self.txtTwo = wx.StaticText(self, -1, label = "", pos = (20,40))
-
-        button = wx.Button(self, label = "search", pos = (20,70))
-        button.Bind(wx.EVT_BUTTON, self.onButton)
-
-    def onButton(self, event):
-        var=self.txtPlace.GetValue()
-        if len(var) == 9 or len(var) == 11:
-            print "???"
-        # MainPanel->SplitterWindow->MainFrame ( 2x GetParent() )
-        self.GetParent().GetParent().AddPanel()
-
-
 
 class MainWindow(wx.Frame):
     def __init__(self, parent, title):
@@ -60,7 +40,7 @@ class MainWindow(wx.Frame):
         menuBar.Append(helpmenu, "&Help")
         self.SetMenuBar(menuBar)  # Adding the MenuBar to the Frame content.
 
-        # Set events.
+        # Set events of the menubar.
         self.Bind(wx.EVT_MENU, self.OnAbout, menuAbout)
         self.Bind(wx.EVT_MENU, self.OnExit, menuExit)
         self.Bind(wx.EVT_MENU, self.OnRecord, menuRecord)
@@ -71,10 +51,16 @@ class MainWindow(wx.Frame):
         # Creating the toolbar
         vbox = wx.BoxSizer(wx.VERTICAL)
         mainToolbar = wx.ToolBar(self)
-        mainToolbar.AddLabelTool(wx.ID_ANY, '', wx.Bitmap('images/open32.png'))
-        mainToolbar.AddLabelTool(wx.ID_ANY, '', wx.Bitmap('images/record32.png'))
-        mainToolbar.AddLabelTool(wx.ID_ANY, '', wx.Bitmap('images/save32.png'))
+        toolbarOpen = mainToolbar.AddLabelTool(wx.ID_ANY, '', wx.Bitmap('images/open32.png'))
+        toolbarRecord = mainToolbar.AddLabelTool(wx.ID_ANY, '', wx.Bitmap('images/record32.png'))
+        toolbarSave = mainToolbar.AddLabelTool(wx.ID_ANY, '', wx.Bitmap('images/save32.png'))
         mainToolbar.Realize()
+
+        # Set events of the toolbar
+
+        self.Bind(wx.EVT_MENU, self.OnOpen, toolbarOpen)
+        self.Bind(wx.EVT_MENU, self.OnRecord, toolbarRecord)
+        self.Bind(wx.EVT_MENU, self.OnSave, toolbarSave)
 
         vbox.Add(mainToolbar, 0, wx.EXPAND)
         self.SetSizer(vbox)
@@ -87,9 +73,12 @@ class MainWindow(wx.Frame):
         if dlg.ShowModal() == wx.ID_OK:
             self.filename = dlg.GetFilename()
             self.dirname = dlg.GetDirectory()
-            f = open(os.path.join(self.dirname, self.filename), 'r')
-            #self.control.SetValue(f.read())
-            f.close()
+            wf = wave.open(self.dirname+"/"+self.filename, 'rb')
+            soundfile.channels = wf.getnchannels()
+            soundfile.rate = wf.getframerate()
+            soundfile.frames = wf.getnframes()
+            soundfile.sample_size = wf.getsampwidth()
+            wf.close()
         dlg.Destroy()
 
     def OnSave(self, e):
@@ -99,11 +88,10 @@ class MainWindow(wx.Frame):
             self.filename = dlg.GetFilename()
             self.dirname = dlg.GetDirectory()
             save(self.dirname, self.filename, soundfile)
-
         dlg.Destroy()
 
     def OnAbout(self, e):
-        dlg = wx.MessageDialog( self, "An attempt of doing a sheet music creator.\nVersion 0.1a\n2014\nCreate by Jose Carlos M. Aragon.\nYou can ask me on twitter: @Montagon.", "About Sheet music creator", wx.OK)
+        dlg = wx.MessageDialog( self, "An attempt of doing a sheet music creator.\nVersion 0.1a\n2014\nCreated by Jose Carlos M. Aragon.\nYou can contact me via twitter: @Montagon.", "About Sheet music creator", wx.OK)
         dlg.ShowModal()
         dlg.Destroy()
 
