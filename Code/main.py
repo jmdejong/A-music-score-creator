@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import os
 import wx
 from sound import *
@@ -7,11 +9,30 @@ def initialize():
     global soundfile
     soundfile = filesound()
 
+class PanelBar(wx.Panel):
+    def __init__(self, parent):
+        """Constructor"""
+        wx.Panel.__init__(self, parent = parent)
+
+        self.txtOne = wx.StaticText(self, -1, label = "piradoba", pos = (20,10))
+        self.txtPlace = wx.TextCtrl(self, pos = (20,30))
+        self.txtTwo = wx.StaticText(self, -1, label = "", pos = (20,40))
+
+        button = wx.Button(self, label = "search", pos = (20,70))
+        button.Bind(wx.EVT_BUTTON, self.onButton)
+
+    def onButton(self, event):
+        var=self.txtPlace.GetValue()
+        if len(var) == 9 or len(var) == 11:
+            print "???"
+        # MainPanel->SplitterWindow->MainFrame ( 2x GetParent() )
+        self.GetParent().GetParent().AddPanel()
+
+
 
 class MainWindow(wx.Frame):
     def __init__(self, parent, title):
         wx.Frame.__init__(self, parent, title=title, size=(800,600))
-        self.control = wx.StaticBox(self)#, style=wx.TE_MULTILINE)
         initialize()
 
         # Setting up the menu.
@@ -45,6 +66,18 @@ class MainWindow(wx.Frame):
         self.Bind(wx.EVT_MENU, self.OnRecord, menuRecord)
         self.Bind(wx.EVT_MENU, self.OnOpen, menuOpen)
         self.Bind(wx.EVT_MENU, self.OnSave, menuSave)
+
+
+        # Creating the toolbar
+        vbox = wx.BoxSizer(wx.VERTICAL)
+        mainToolbar = wx.ToolBar(self)
+        mainToolbar.AddLabelTool(wx.ID_ANY, '', wx.Bitmap('images/open32.png'))
+        mainToolbar.AddLabelTool(wx.ID_ANY, '', wx.Bitmap('images/record32.png'))
+        mainToolbar.AddLabelTool(wx.ID_ANY, '', wx.Bitmap('images/save32.png'))
+        mainToolbar.Realize()
+
+        vbox.Add(mainToolbar, 0, wx.EXPAND)
+        self.SetSizer(vbox)
 
         self.Show(True)
 
