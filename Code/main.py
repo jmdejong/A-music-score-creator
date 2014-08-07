@@ -11,7 +11,7 @@ def initialize():
 class MainWindow(wx.Frame):
     def __init__(self, parent, title):
         wx.Frame.__init__(self, parent, title=title, size=(800,600))
-        self.control = wx.TextCtrl(self, style=wx.TE_MULTILINE)
+        self.control = wx.StaticBox(self)#, style=wx.TE_MULTILINE)
         initialize()
 
         # Setting up the menu.
@@ -63,18 +63,20 @@ class MainWindow(wx.Frame):
         self.dirname = '.'
         dlg = wx.FileDialog(self, "Save audio", self.dirname, "", "*.wav", wx.SAVE)
         if dlg.ShowModal() == wx.ID_OK:
-            pass
+            self.filename = dlg.GetFilename()
+            self.dirname = dlg.GetDirectory()
+            save(self.dirname, self.filename, soundfile)
 
         dlg.Destroy()
 
     def OnAbout(self, e):
-        dlg = wx.MessageDialog( self, "An attempt of doing a sheet music creator", "About Sheet music creator", wx.OK)
+        dlg = wx.MessageDialog( self, "An attempt of doing a sheet music creator.\nVersion 0.1a\n2014\nCreate by Jose Carlos M. Aragon.\nYou can ask me on twitter: @Montagon.", "About Sheet music creator", wx.OK)
         dlg.ShowModal()
         dlg.Destroy()
 
 
     def OnRecord(self, e):
-        soundfile.frames = record()
+        soundfile.frames = record(soundfile)
 
     def OnExit(self, e):
         self.Close(True)
