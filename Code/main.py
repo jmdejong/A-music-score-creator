@@ -6,15 +6,15 @@ from sound import *
 
 def initialize():
     # Create all the variables.
-    global soundfile
-    soundfile = filesound()
+    global audioData
+    audioData = AudioData()
 
 
 class MainWindow(wx.Frame):
     def __init__(self, parent, title):
         wx.Frame.__init__(self, parent, title=title, size=(800,600))
         initialize()
-        global menuSave, menuPlay
+        global menuSave, menuPlay, soundfile
 
         # Setting up the menu.
         filemenu = wx.Menu()
@@ -85,13 +85,18 @@ class MainWindow(wx.Frame):
         if dlg.ShowModal() == wx.ID_OK:
             self.filename = dlg.GetFilename()
             self.dirname = dlg.GetDirectory()
-            wf = wave.open(self.dirname+"/"+self.filename, 'rb')
-            soundfile.channels = wf.getnchannels()
-            soundfile.rate = wf.getframerate()
-            soundfile.frames = wf.getnframes()
-            soundfile.sample_size = wf.getsampwidth()
-            wf.close()
+            soundfile = wave.open(self.dirname+"/"+self.filename, 'rb')
+            soundfile.close()
+            mainToolbar.EnableTool(wx.ID_SAVE, True)
+            mainToolbar.EnableTool(6001, True)
+            menuSave.Enable(True)
+            menuPlay.Enable(True)
         dlg.Destroy()
+
+    def OnRecord(self, e):
+        mainToolbar.EnableTool(5990, False)
+        soundfile = record(audioData)
+        mainToolbar.EnableTool(5990, True)
         mainToolbar.EnableTool(wx.ID_SAVE, True)
         mainToolbar.EnableTool(6001, True)
         menuSave.Enable(True)
@@ -103,7 +108,7 @@ class MainWindow(wx.Frame):
         if dlg.ShowModal() == wx.ID_OK:
             self.filename = dlg.GetFilename()
             self.dirname = dlg.GetDirectory()
-            save(self.dirname, self.filename, soundfile)
+            save(self.dirname, self.filename, soundfile, audioData)
         dlg.Destroy()
 
     def OnAbout(self, e):
@@ -111,17 +116,9 @@ class MainWindow(wx.Frame):
         dlg.ShowModal()
         dlg.Destroy()
 
-    def OnRecord(self, e):
-        mainToolbar.EnableTool(5990, False)
-        soundfile.frames = record(soundfile)
-        mainToolbar.EnableTool(5990, True)
-        mainToolbar.EnableTool(wx.ID_SAVE, True)
-        mainToolbar.EnableTool(6001, True)
-        menuSave.Enable(True)
-        menuPlay.Enable(True)
-
     def OnPlay(self, e):
-        play()
+        pass
+        #play(soundfile)
 
     def OnExit(self, e):
         self.Close(True)
