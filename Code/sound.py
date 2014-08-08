@@ -9,7 +9,7 @@ class filesound():
 		self.rate = 8000
 		self.frames = 0
 		self.chunk = 1024
-		self.record_seconds = 1
+		self.record_seconds = 5
 		self.sample_size = 0
 
 
@@ -52,3 +52,6 @@ def save(dirname, filename, soundfile):
 	wf.setframerate(soundfile.rate)
 	wf.writeframes(b''.join(soundfile.frames))
 	wf.close()
+
+def play():
+	pass
