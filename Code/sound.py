@@ -31,11 +31,10 @@ def record(audioData):
 	print("* done recording")
 
 	audioData.sample_size = p.get_sample_size(audioData.format)
-	print(p.get_sample_size(audioData.format))
 	stream.stop_stream()
-	stream.close()
+	#stream.close()
 	p.terminate()
-	return (p, frames)
+	return (stream, frames)
 
 def save(dirname, filename, soundfile, audioData):
 	wf = wave.open(dirname+"/"+filename+".wav", 'wb')
@@ -45,27 +44,27 @@ def save(dirname, filename, soundfile, audioData):
 	wf.writeframes(b''.join(audioData.frames))
 	wf.close()
 
-def play(soundfile):
+def play(soundfile, aData):
 
 	#f = wave.open(r"/usr/share/sounds/alsa/Rear_Center.wav","rb")  
 	#instantiate PyAudio  
 	p = pyaudio.PyAudio()  
 	#open stream  
-	stream = p.open(format = p.get_format_from_width(f.getsampwidth()),  
-	                channels = f.getnchannels(),  
-	                rate = f.getframerate(),  
+	stream = p.open(format = p.get_format_from_width(soundfile.getsampwidth()),  
+	                channels = soundfile.getnchannels(),  
+	                rate = soundfile.getframerate(),  
 	                output = True)  
 	#read data  
-	data = f.readframes(chunk)  
+	data = soundfile.readframes(aData.chunk)  
 
 	#paly stream  
 	while data != '':  
 	    stream.write(data)  
-	    data = f.readframes(chunk)  
+	    data = soundfile.readframes(aData.chunk)  
 
 	#stop stream  
 	stream.stop_stream()  
 	stream.close()  
 
 	#close PyAudio  
-	p.terminate()  
+	#p.terminate()  

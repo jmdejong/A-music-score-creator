@@ -80,18 +80,18 @@ class MainWindow(wx.Frame):
         self.Show(True)
 
     def OnOpen(self, e):
-        global soundfile
+        global soundfile, audioData
         self.dirname = '.'
         dlg = wx.FileDialog(self, "Choose a file", self.dirname, "", "*.wav", wx.OPEN)
         if dlg.ShowModal() == wx.ID_OK:
             self.filename = dlg.GetFilename()
             self.dirname = dlg.GetDirectory()
             soundfile = wave.open(self.dirname+"/"+self.filename, 'rb')
-            soundfile.close()
             mainToolbar.EnableTool(wx.ID_SAVE, True)
             mainToolbar.EnableTool(6001, True)
             menuSave.Enable(True)
-            menuPlay.Enable(True)
+            menuPlay.Enable(True) 
+            
         dlg.Destroy()
 
     def OnRecord(self, e):
@@ -116,13 +116,14 @@ class MainWindow(wx.Frame):
         dlg.Destroy()
 
     def OnAbout(self, e):
-        dlg = wx.MessageDialog( self, "An attempt of doing a sheet music creator.\nVersion 0.1a\n2014\nCreated by Jose Carlos M. Aragon.\nYou can contact me via twitter: @Montagon.", "About Sheet music creator", wx.OK)
+        dlg = wx.MessageDialog( self, "An attempt of doing a sheet music creator.\nVersion 0.2a\n2014\nCreated by Jose Carlos M. Aragon.\nYou can contact me via twitter: @Montagon.", "About Sheet music creator", wx.OK)
         dlg.ShowModal()
         dlg.Destroy()
 
     def OnPlay(self, e):
         pass
-        #play(soundfile)
+        global soundfile, audioData
+        play(soundfile, audioData)
 
     def OnExit(self, e):
         self.Close(True)
