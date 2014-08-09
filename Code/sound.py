@@ -30,12 +30,12 @@ def record(audioData):
 
 	print("* done recording")
 
-	AudioData.sample_size = p.get_sample_size(audioData.format)
-	AudioData.frames = frames
+	audioData.sample_size = p.get_sample_size(audioData.format)
+	print(p.get_sample_size(audioData.format))
 	stream.stop_stream()
 	stream.close()
 	p.terminate()
-	return p
+	return (p, frames)
 
 def save(dirname, filename, soundfile, audioData):
 	wf = wave.open(dirname+"/"+filename+".wav", 'wb')
