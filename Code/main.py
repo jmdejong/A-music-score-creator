@@ -15,6 +15,7 @@ class MainWindow(wx.Frame):
         wx.Frame.__init__(self, parent, title=title, size=(800,600))
         initialize()
         global menuSave, menuPlay, soundfile, audioData
+        sounddirectory = ""
 
         # Setting up the menu.
         filemenu = wx.Menu()
@@ -80,12 +81,13 @@ class MainWindow(wx.Frame):
         self.Show(True)
 
     def OnOpen(self, e):
-        global soundfile, audioData
+        global soundfile, audioData, sounddirectory
         self.dirname = '.'
         dlg = wx.FileDialog(self, "Choose a file", self.dirname, "", "*.wav", wx.OPEN)
         if dlg.ShowModal() == wx.ID_OK:
             self.filename = dlg.GetFilename()
             self.dirname = dlg.GetDirectory()
+            sounddirectory = self.dirname+"/"+self.filename
             soundfile = wave.open(self.dirname+"/"+self.filename, 'rb')
             mainToolbar.EnableTool(wx.ID_SAVE, True)
             mainToolbar.EnableTool(6001, True)
@@ -95,9 +97,9 @@ class MainWindow(wx.Frame):
         dlg.Destroy()
 
     def OnRecord(self, e):
-        global soundfile,menuSave, menuPlay, audioData
+        global soundfile,menuSave, menuPlay, audioData, sounddirectory
         mainToolbar.EnableTool(5990, False)
-        (soundfile, frames) = record(audioData)
+        (soundfile, frames, sounddirectory) = record(audioData)
         audioData.frames = frames
         mainToolbar.EnableTool(5990, True)
         mainToolbar.EnableTool(wx.ID_SAVE, True)
@@ -121,9 +123,9 @@ class MainWindow(wx.Frame):
         dlg.Destroy()
 
     def OnPlay(self, e):
-        pass
-        global soundfile, audioData
-        play(soundfile, audioData)
+        global soundfile, audioData, sounddirectory
+        print(sounddirectory)
+        play(soundfile, audioData, sounddirectory)
 
     def OnExit(self, e):
         self.Close(True)

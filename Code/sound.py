@@ -1,5 +1,6 @@
 import pyaudio
 import wave
+import time
 
 class AudioData():
 	def __init__(self):
@@ -12,6 +13,7 @@ class AudioData():
 		self.sample_size = 0
 
 def record(audioData):
+	global sounddirectory
 	p = pyaudio.PyAudio()
 
 	stream = p.open(format=audioData.format,
@@ -32,39 +34,43 @@ def record(audioData):
 
 	audioData.sample_size = p.get_sample_size(audioData.format)
 	stream.stop_stream()
-	#stream.close()
+	sounddirectory = "/tmp/"+time.strftime("%H%M%S")+".wav"
+
+	wf = wave.open(sounddirectory, 'wb')
+	wf.setnchannels(audioData.channels)
+	wf.setsampwidth(p.get_sample_size(audioData.format))
+	audioData.sample_size = p.get_sample_size(audioData.format)
+	wf.setframerate(audioData.rate)
+	wf.writeframes(b''.join(frames))
+	wf.close()
+
+	stream.close()
 	p.terminate()
-	return (stream, frames)
+	return (stream, frames, sounddirectory)
 
 def save(dirname, filename, soundfile, audioData):
 	wf = wave.open(dirname+"/"+filename+".wav", 'wb')
 	wf.setnchannels(audioData.channels)
-	wf.setsampwidth(soundfile.get_sample_size(audioData.format))
+	wf.setsampwidth(audioData.sample_size)
 	wf.setframerate(audioData.rate)
 	wf.writeframes(b''.join(audioData.frames))
 	wf.close()
 
-def play(soundfile, aData):
+def play(soundfile, aData, sounddirectory):
 
-	#f = wave.open(r"/usr/share/sounds/alsa/Rear_Center.wav","rb")  
-	#instantiate PyAudio  
+	f = wave.open(sounddirectory,"rb")  
 	p = pyaudio.PyAudio()  
-	#open stream  
-	stream = p.open(format = p.get_format_from_width(soundfile.getsampwidth()),  
-	                channels = soundfile.getnchannels(),  
-	                rate = soundfile.getframerate(),  
-	                output = True)  
-	#read data  
-	data = soundfile.readframes(aData.chunk)  
 
-	#paly stream  
+	stream = p.open(format = p.get_format_from_width(f.getsampwidth()),  
+	                channels = f.getnchannels(),  
+	                rate = f.getframerate(),  
+	                output = True)  
+	data = f.readframes(aData.chunk)  
+
 	while data != '':  
 	    stream.write(data)  
-	    data = soundfile.readframes(aData.chunk)  
-
-	#stop stream  
+	    data = f.readframes(aData.chunk)  
+  
 	stream.stop_stream()  
-	stream.close()  
-
-	#close PyAudio  
-	#p.terminate()  
+	stream.close()   
+	p.terminate()  
