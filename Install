@@ -19,3 +19,8 @@ Then, to launch the program, you can do this:
 ---------- In test ----------
 	scipy
 	matplotlib
+
+------------------------
+
+
+sudo apt-get install python-numpy python-scipy python-matplotlib ipython-notebook python-pandas python-sympy python-nose

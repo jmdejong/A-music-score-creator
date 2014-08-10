@@ -14,8 +14,8 @@ class MainWindow(wx.Frame):
     def __init__(self, parent, title):
         wx.Frame.__init__(self, parent, title=title, size=(800,600))
         initialize()
-        global menuSave, menuPlay, soundfile, audioData
-        sounddirectory = ""
+        global menuSave, menuPlay, soundfile, audioData, menuAudioProcess, sounddirectory
+        #sounddirectory = "/tmp/"
 
         # Setting up the menu.
         filemenu = wx.Menu()
@@ -33,7 +33,9 @@ class MainWindow(wx.Frame):
         # --- Sound menu ---
         menuRecord = soundmenu.Append(wx.ID_ANY, "&Record", "Record an audio")
         menuPlay = soundmenu.Append(wx.ID_ANY, "Play", "Play an audio")
+        menuAudioProcess = soundmenu.Append(wx.ID_ANY, "Generate PDF", "Generate PDF from audio")
         menuPlay.Enable(False)
+        menuAudioProcess.Enable(False)
 
         # --- Help menu ---
         menuAbout = helpmenu.Append(wx.ID_ABOUT, "&About"," Information about this program")
@@ -51,6 +53,7 @@ class MainWindow(wx.Frame):
         self.Bind(wx.EVT_MENU, self.OnExit, menuExit)
         self.Bind(wx.EVT_MENU, self.OnRecord, menuRecord)
         self.Bind(wx.EVT_MENU, self.OnPlay, menuPlay)
+        self.Bind(wx.EVT_MENU, self.OnAudioProcess, menuAudioProcess)
         self.Bind(wx.EVT_MENU, self.OnOpen, menuOpen)
         self.Bind(wx.EVT_MENU, self.OnSave, menuSave)
 
@@ -64,8 +67,10 @@ class MainWindow(wx.Frame):
         mainToolbar.AddSeparator()
         toolbarRecord = mainToolbar.AddLabelTool(5990, '', wx.Bitmap('images/record32.png'))
         toolbarPlay = mainToolbar.AddLabelTool(6001, '', wx.Bitmap('images/play32.png'))
+        toolbarAudioProcess = mainToolbar.AddLabelTool(6002, '', wx.Bitmap('images/pdf32.png'))
         mainToolbar.EnableTool(wx.ID_SAVE, False) # Before we have an audio, it's deactivated.
         mainToolbar.EnableTool(6001, False)
+        mainToolbar.EnableTool(6002, False)
         mainToolbar.Realize()
 
         # Set events of the toolbar
@@ -73,6 +78,7 @@ class MainWindow(wx.Frame):
         self.Bind(wx.EVT_MENU, self.OnOpen, toolbarOpen)
         self.Bind(wx.EVT_MENU, self.OnRecord, toolbarRecord)
         self.Bind(wx.EVT_MENU, self.OnPlay, toolbarPlay)
+        self.Bind(wx.EVT_MENU, self.OnAudioProcess, toolbarAudioProcess)
         self.Bind(wx.EVT_MENU, self.OnSave, toolbarSave)
 
         vbox.Add(mainToolbar, 0, wx.EXPAND)
@@ -91,21 +97,30 @@ class MainWindow(wx.Frame):
             soundfile = wave.open(self.dirname+"/"+self.filename, 'rb')
             mainToolbar.EnableTool(wx.ID_SAVE, True)
             mainToolbar.EnableTool(6001, True)
+            mainToolbar.EnableTool(6002, True)
             menuSave.Enable(True)
-            menuPlay.Enable(True) 
+            menuPlay.Enable(True)
+            menuAudioProcess.Enable(True) 
             
         dlg.Destroy()
 
     def OnRecord(self, e):
-        global soundfile,menuSave, menuPlay, audioData, sounddirectory
+        global soundfile,menuSave, menuPlay, menuAudioProcess, audioData, sounddirectory
         mainToolbar.EnableTool(5990, False)
         (soundfile, frames, sounddirectory) = record(audioData)
         audioData.frames = frames
         mainToolbar.EnableTool(5990, True)
         mainToolbar.EnableTool(wx.ID_SAVE, True)
         mainToolbar.EnableTool(6001, True)
+        mainToolbar.EnableTool(6002, True)
         menuSave.Enable(True)
         menuPlay.Enable(True)
+        menuAudioProcess.Enable(True)
+
+    def OnAudioProcess(self, e):
+        #Add interaction to save the file. In test, only the path to the file to process
+        global sounddirectory
+        audioProcessing(sounddirectory)
 
     def OnSave(self, e):
         global soundfile, audioData

@@ -2,6 +2,17 @@ import pyaudio
 import wave
 import time
 
+# Experimental, to do the fft and some test
+
+from pylab import*
+from scipy.io import wavfile
+
+# End experimental
+
+def audioProcessing(filename):
+	sampFreq, snd = wavfile.read(filename)
+	print(sampFreq)
+
 class AudioData():
 	def __init__(self):
 		self.channels = 1
