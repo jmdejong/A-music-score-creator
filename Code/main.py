@@ -133,7 +133,7 @@ class MainWindow(wx.Frame):
         dlg.Destroy()
 
     def OnAbout(self, e):
-        dlg = wx.MessageDialog( self, "An attempt of doing a sheet music creator.\nVersion 0.2a\n2014\nCreated by Jose Carlos M. Aragon.\nYou can contact me via twitter: @Montagon.", "About Sheet music creator", wx.OK)
+        dlg = wx.MessageDialog( self, "An attempt of doing a music score creator.\nVersion 0.2a - 2014\nCreated by Jose Carlos M. Aragon.\nYou can contact me via twitter: @Montagon.", "About Music score creator", wx.OK)
         dlg.ShowModal()
         dlg.Destroy()
 
@@ -146,5 +146,5 @@ class MainWindow(wx.Frame):
         self.Close(True)
 
 app = wx.App(False)
-frame = MainWindow(None, "Sheet music creator")
+frame = MainWindow(None, "Music score creator")
 app.MainLoop()
