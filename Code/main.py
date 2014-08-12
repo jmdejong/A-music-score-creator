@@ -138,7 +138,6 @@ class MainWindow(wx.Frame):
 
     def OnPlay(self, e):
         global soundfile, audioData, sounddirectory
-        print(sounddirectory)
         play(soundfile, audioData, sounddirectory)
 
     def OnExit(self, e):
