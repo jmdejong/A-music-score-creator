@@ -1,17 +1,9 @@
 import pyaudio
 import wave
 import time
-
-# Experimental, to do the fft and some test
-
 from pylab import*
 from scipy.io import wavfile
-
-# End experimental
-
-def audioProcessing(filename):
-	sampFreq, snd = wavfile.read(filename)
-	print(sampFreq)
+import numpy
 
 class AudioData():
 	def __init__(self):
@@ -85,3 +77,35 @@ def play(soundfile, aData, sounddirectory):
 	stream.stop_stream()  
 	stream.close()   
 	p.terminate()  
+
+def audioProcessing(filename, audioData):
+	wf = wave.open(filename, 'rb')
+	swidth = wf.getsampwidth()
+	RATE = wf.getframerate()
+	# Use a Blackman window
+	window = numpy.blackman(audioData.chunk)
+
+	# Read some data
+	data = wf.readframes(audioData.chunk)
+	# Find the frequency of each chunk
+	while len(data) == audioData.chunk*swidth:
+
+	    # Unpack the data and times by the hamming window
+	    indata = numpy.array(wave.struct.unpack("%dh"%(len(data)/swidth),\
+	                                         data))*window
+	    # Take the fft and square each value
+	    fftData=abs(numpy.fft.rfft(indata))**2
+	    # Find the maximum
+	    which = fftData[1:].argmax() + 1
+	    # Use quadratic interpolation around the max
+	    if which != len(fftData)-1:
+	        y0,y1,y2 = numpy.log(fftData[which-1:which+2:])
+	        x1 = (y2 - y0) * .5 / (2 * y1 - y2 - y0)
+	        # Find the frequency and output it
+	        thefreq = (which+x1)*RATE/audioData.chunk
+	        print "The freq is %f Hz." % (thefreq)
+	    else:
+	        thefreq = which*RATE/audioData.chunk
+	        print "The freq is %f Hz." % (thefreq)
+	    # Read some more data
+	    data = wf.readframes(audioData.chunk)

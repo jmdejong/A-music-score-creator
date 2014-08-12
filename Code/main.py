@@ -15,7 +15,6 @@ class MainWindow(wx.Frame):
         wx.Frame.__init__(self, parent, title=title, size=(800,600))
         initialize()
         global menuSave, menuPlay, soundfile, audioData, menuAudioProcess, sounddirectory
-        #sounddirectory = "/tmp/"
 
         # Setting up the menu.
         filemenu = wx.Menu()
@@ -120,7 +119,7 @@ class MainWindow(wx.Frame):
     def OnAudioProcess(self, e):
         #Add interaction to save the file. In test, only the path to the file to process
         global sounddirectory
-        audioProcessing(sounddirectory)
+        audioProcessing(sounddirectory, audioData)
 
     def OnSave(self, e):
         global soundfile, audioData
@@ -133,7 +132,7 @@ class MainWindow(wx.Frame):
         dlg.Destroy()
 
     def OnAbout(self, e):
-        dlg = wx.MessageDialog( self, "An attempt of doing a music score creator.\nVersion 0.2a - 2014\nCreated by Jose Carlos M. Aragon.\nYou can contact me via twitter: @Montagon.", "About Music score creator", wx.OK)
+        dlg = wx.MessageDialog( self, "An attempt of doing a music score creator.\nVersion 0.3a - 2014\nCreated by Jose Carlos M. Aragon.\nYou can contact me via twitter: @Montagon.", "About Music score creator", wx.OK)
         dlg.ShowModal()
         dlg.Destroy()
 

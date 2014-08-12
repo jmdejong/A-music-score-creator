@@ -5,22 +5,15 @@ To use this program, yo need to install this packages:
 
 - python-wxgtk2.8
 - python-pyaudio
+- python-numpy 
+- python-scipy
+- python-matplotlib
 
 In Debian system, you can write:
 
-	apt-get install python-wxgtk2.8 python-pyaudio
+	apt-get install python-wxgtk2.8 python-pyaudio python-numpy python-scipy python-matplotlib
 
 Then, to launch the program, you can do this:
 
 	- Give it execution permissions and then: $ ./main.py
 	- Execute with: $ python main.py
-
-
----------- In test ----------
-	scipy
-	matplotlib
-
-------------------------
-
-
-sudo apt-get install python-numpy python-scipy python-matplotlib ipython-notebook python-pandas python-sympy python-nose
