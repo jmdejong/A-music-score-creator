@@ -11,9 +11,24 @@ class AudioData():
 		self.format = pyaudio.paInt16
 		self.rate = 8000
 		self.frames = 0
-		self.chunk = 1024
-		self.record_seconds = 2
+		self.chunk = 2000
+		self.record_seconds = 1
 		self.sample_size = 0
+		self.quarter_note_minute = 60 # Allowed values: 60, 90, 120
+		self.measure = '3/4'
+
+
+def tempo(audioData):
+	#global audioData
+	quarter_note = audioData.quarter_note_minute/60.0 # 
+	semiquaver = 4*quarter_note
+
+	# Determining the size of the chunk. That is, the number of semiquaver for second
+	audioData.chunk = int(ceil(2530 - 200*semiquaver))
+
+	return audioData
+
+
 
 def record(audioData):
 	global sounddirectory
@@ -82,12 +97,15 @@ def audioProcessing(filename, audioData):
 	wf = wave.open(filename, 'rb')
 	swidth = wf.getsampwidth()
 	RATE = wf.getframerate()
+	audioData = tempo(audioData)
+
 	# Use a Blackman window
 	window = numpy.blackman(audioData.chunk)
 
 	# Read some data
 	data = wf.readframes(audioData.chunk)
 	# Find the frequency of each chunk
+	list_of_freq = []
 	while len(data) == audioData.chunk*swidth:
 
 	    # Unpack the data and times by the hamming window
@@ -104,8 +122,13 @@ def audioProcessing(filename, audioData):
 	        # Find the frequency and output it
 	        thefreq = (which+x1)*RATE/audioData.chunk
 	        print "The freq is %f Hz." % (thefreq)
+	        list_of_freq.append(thefreq)
 	    else:
 	        thefreq = which*RATE/audioData.chunk
 	        print "The freq is %f Hz." % (thefreq)
+	        list_of_freq.append(thefreq)
 	    # Read some more data
 	    data = wf.readframes(audioData.chunk)
+
+
+	return list_of_freq

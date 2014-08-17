@@ -12,9 +12,11 @@ def initialize():
 
 class MainWindow(wx.Frame):
     def __init__(self, parent, title):
-        wx.Frame.__init__(self, parent, title=title, size=(800,600))
+        wx.Frame.__init__(self, parent, title=title, size=(300,300))
         initialize()
-        global menuSave, menuPlay, soundfile, audioData, menuAudioProcess, sounddirectory
+        global menuSave, menuPlay, soundfile, audioData, menuAudioProcess, sounddirectory, tRecord
+        panel = wx.Panel(self)
+        sizer = wx.GridBagSizer(5, 5)
 
         # Setting up the menu.
         filemenu = wx.Menu()
@@ -81,6 +83,30 @@ class MainWindow(wx.Frame):
         self.Bind(wx.EVT_MENU, self.OnSave, toolbarSave)
 
         vbox.Add(mainToolbar, 0, wx.EXPAND)
+
+        # 
+        tempos = ['60', '90', '120', '150']
+        wx.StaticText(self, label=("Tempo"), pos=(10, 74))
+        cb_tempo = wx.ComboBox(self, value=('60'), pos=(70, 70), choices=tempos, 
+            style=wx.CB_READONLY)
+
+        wx.StaticLine(self, pos=(0, 50), size=(300,1))
+
+        tRecord = wx.TextCtrl(self,-1, pos=(125, 110), value="2")
+        wx.StaticText(self, label=("Recording time"), pos=(10, 114))
+        wx.StaticText(self, label=("seconds"), pos=(210, 114))
+
+        measures = ['2/4', '3/4', '4/4']
+        wx.StaticText(self, label=("Measure"), pos=(10, 154))
+        cb_measure = wx.ComboBox(self, value=('4/4'), pos=(70, 150), choices=measures, 
+            style=wx.CB_READONLY)
+
+
+        # Events of the block
+
+        self.Bind(wx.EVT_COMBOBOX, self.OnTempo, cb_tempo)
+        self.Bind(wx.EVT_COMBOBOX, self.OnMeasure, cb_measure)
+
         self.SetSizer(vbox)
 
         self.Show(True)
@@ -105,7 +131,9 @@ class MainWindow(wx.Frame):
 
     def OnRecord(self, e):
         global soundfile,menuSave, menuPlay, menuAudioProcess, audioData, sounddirectory
+        global tRecord
         mainToolbar.EnableTool(5990, False)
+        audioData.record_seconds = int(tRecord.GetValue())
         (soundfile, frames, sounddirectory) = record(audioData)
         audioData.frames = frames
         mainToolbar.EnableTool(5990, True)
@@ -119,7 +147,7 @@ class MainWindow(wx.Frame):
     def OnAudioProcess(self, e):
         #Add interaction to save the file. In test, only the path to the file to process
         global sounddirectory
-        audioProcessing(sounddirectory, audioData)
+        list_freq = audioProcessing(sounddirectory, audioData)
 
     def OnSave(self, e):
         global soundfile, audioData
@@ -132,7 +160,7 @@ class MainWindow(wx.Frame):
         dlg.Destroy()
 
     def OnAbout(self, e):
-        dlg = wx.MessageDialog( self, "An attempt of doing a music score creator.\nVersion 0.3a - 2014\nCreated by Jose Carlos M. Aragon.\nYou can contact me via twitter: @Montagon.", "About Music score creator", wx.OK)
+        dlg = wx.MessageDialog( self, "An attempt of doing a music score creator.\nVersion 0.4a - 2014\nCreated by Jose Carlos M. Aragon.\nYou can contact me via twitter: @Montagon.", "About Music score creator", wx.OK)
         dlg.ShowModal()
         dlg.Destroy()
 
@@ -142,6 +170,14 @@ class MainWindow(wx.Frame):
 
     def OnExit(self, e):
         self.Close(True)
+
+    def OnTempo(self, e):
+        global audioData
+        audioData.quarter_note_minute = int(e.GetString())
+
+    def OnMeasure(self, e):
+        global audioData
+        audioData.measure = e.GetString()
 
 app = wx.App(False)
 frame = MainWindow(None, "Music score creator")
