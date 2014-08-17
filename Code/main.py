@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+# -*- coding: utf-8 -*-
+
 import os
 import wx
 from sound import *
@@ -12,11 +14,10 @@ def initialize():
 
 class MainWindow(wx.Frame):
     def __init__(self, parent, title):
-        wx.Frame.__init__(self, parent, title=title, size=(300,300))
+        wx.Frame.__init__(self, parent, style=wx.DEFAULT_FRAME_STYLE ^ wx.RESIZE_BORDER, title=title, size=(300,300))
         initialize()
         global menuSave, menuPlay, soundfile, audioData, menuAudioProcess, sounddirectory, tRecord
         panel = wx.Panel(self)
-        sizer = wx.GridBagSizer(5, 5)
 
         # Setting up the menu.
         filemenu = wx.Menu()
@@ -87,18 +88,18 @@ class MainWindow(wx.Frame):
         # 
         tempos = ['60', '90', '120', '150']
         wx.StaticText(self, label=("Tempo"), pos=(10, 74))
-        cb_tempo = wx.ComboBox(self, value=('60'), pos=(70, 70), choices=tempos, 
+        cb_tempo = wx.ComboBox(self, value=('60'), pos=(209, 70), size=(80, 28), choices=tempos, 
             style=wx.CB_READONLY)
 
         wx.StaticLine(self, pos=(0, 50), size=(300,1))
 
-        tRecord = wx.TextCtrl(self,-1, pos=(125, 110), value="2")
-        wx.StaticText(self, label=("Recording time"), pos=(10, 114))
-        wx.StaticText(self, label=("seconds"), pos=(210, 114))
+        tRecord = wx.TextCtrl(self,-1, pos=(209, 110), value="2")
+        wx.StaticText(self, label=("Recording time (seconds)"), pos=(10, 114))
+        #wx.StaticText(self, label=("seconds"), pos=(210, 114))
 
         measures = ['2/4', '3/4', '4/4']
         wx.StaticText(self, label=("Measure"), pos=(10, 154))
-        cb_measure = wx.ComboBox(self, value=('4/4'), pos=(70, 150), choices=measures, 
+        cb_measure = wx.ComboBox(self, value=('4/4'), pos=(209, 150), size=(80, 28), choices=measures, 
             style=wx.CB_READONLY)
 
 
