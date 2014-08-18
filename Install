@@ -1,7 +1,7 @@
 Requirements
 --------------------------
 
-To use this program, yo need to install this packages:
+To use this program, yo need to install this python packages:
 
 - python-wxgtk2.8
 - python-pyaudio
@@ -9,9 +9,13 @@ To use this program, yo need to install this packages:
 - python-scipy
 - python-matplotlib
 
+And this program:
+
+- lilypond
+
 In Debian system, you can write:
 
-	apt-get install python-wxgtk2.8 python-pyaudio python-numpy python-scipy python-matplotlib
+	apt-get install python-wxgtk2.8 python-pyaudio python-numpy python-scipy python-matplotlib lilypond
 
 Then, to launch the program, you can do this:
 
