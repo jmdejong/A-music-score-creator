@@ -148,7 +148,7 @@ class MainWindow(wx.Frame):
     def OnAudioProcess(self, e):
         #Add interaction to save the file. In test, only the path to the file to process
         global sounddirectory
-        list_freq = audioProcessing(sounddirectory, audioData)
+        audioProcessing(sounddirectory, audioData)
 
     def OnSave(self, e):
         global soundfile, audioData
@@ -161,7 +161,7 @@ class MainWindow(wx.Frame):
         dlg.Destroy()
 
     def OnAbout(self, e):
-        dlg = wx.MessageDialog( self, "An attempt of doing a music score creator.\nVersion 0.4a - 2014\nCreated by Jose Carlos M. Aragon.\nYou can contact me via twitter: @Montagon.", "About Music score creator", wx.OK)
+        dlg = wx.MessageDialog( self, "An attempt of doing a music score creator.\nVersion 1beta - 2014\nCreated by Jose Carlos M. Aragon.\nYou can contact me via twitter: @Montagon.", "About Music score creator", wx.OK)
         dlg.ShowModal()
         dlg.Destroy()
 

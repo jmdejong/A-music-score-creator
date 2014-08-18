@@ -1,3 +1,4 @@
+import os
 import pyaudio
 import wave
 import time
@@ -14,12 +15,47 @@ class AudioData():
 		self.chunk = 2000
 		self.record_seconds = 1
 		self.sample_size = 0
-		self.quarter_note_minute = 60 # Allowed values: 60, 90, 120
+		self.quarter_note_minute = 60 
 		self.measure = '3/4'
+
+conversion = [(10000.0,1077.0,"r"),
+			  (1077.0,1017.1,"c''"),
+			  (1017.0,960.0,"b''"),	
+			  (960.0,906.2,"ais''"),
+			  (906.2,855.3,"a''"),
+			  (855.3,807.3,"gis''"),
+			  (807.3,762.0,"g''"),
+			  (762.0,719.2,"fis''"),
+			  (719.2,678.9,"f''"),
+			  (678.9,640.8,"e''"),
+			  (640.8,604.8,"dis''"),
+			  (604.8,570.8,"d''"),
+			  (570.8,538.8,"cis''"),
+			  (538.8,508.6,"c''"),
+			  (508.6,480.0,"b'"),
+			  (480.0,453.1,"ais'"),
+			  (453.1,427.7,"a'"),
+			  (427.7,403.6,"gis'"),
+			  (403.6,381.0,"g'"),
+			  (381.0,359.6,"fis'"),
+			  (359.6,339.4,"f'"),
+			  (339.4,320.4,"e'"),
+			  (320.4,302.4,"dis'"),
+			  (302.4,285.4,"d'"),
+			  (285.4,269.4,"cis'"),
+			  (269.4,254.3,"c'"),
+			  (254.3,240.0,"b"),
+			  (240.0,226.5,"ais"),
+			  (226.5,213.8,"a"),
+			  (213.8,201.8,"gis"),
+			  (201.8,190.5,"g"),
+			  (190.5,179.8,"fis"),
+			  (179.8,169.7,"f"),
+			  (169.7,160.2,"e"),
+			  (160.2,0.0,"r")]
 
 
 def tempo(audioData):
-	#global audioData
 	quarter_note = audioData.quarter_note_minute/60.0 # 
 	semiquaver = 4*quarter_note
 
@@ -94,6 +130,13 @@ def play(soundfile, aData, sounddirectory):
 	p.terminate()  
 
 def audioProcessing(filename, audioData):
+	list_of_freq = getListofFreq(filename, audioData)
+	final_list = preprocessingFreqs(list_of_freq, audioData)
+	writeFile(final_list)
+	os.system("lilypond -s score.ly")
+
+
+def getListofFreq(filename, audioData):
 	wf = wave.open(filename, 'rb')
 	swidth = wf.getsampwidth()
 	RATE = wf.getframerate()
@@ -121,14 +164,60 @@ def audioProcessing(filename, audioData):
 	        x1 = (y2 - y0) * .5 / (2 * y1 - y2 - y0)
 	        # Find the frequency and output it
 	        thefreq = (which+x1)*RATE/audioData.chunk
-	        print "The freq is %f Hz." % (thefreq)
+#	        print "The freq is %f Hz." % (thefreq)
 	        list_of_freq.append(thefreq)
 	    else:
 	        thefreq = which*RATE/audioData.chunk
-	        print "The freq is %f Hz." % (thefreq)
+#	        print "The freq is %f Hz." % (thefreq)
 	        list_of_freq.append(thefreq)
 	    # Read some more data
 	    data = wf.readframes(audioData.chunk)
 
 
 	return list_of_freq
+
+def preprocessingFreqs(list_of_freq, audioData):
+
+	list_ = []
+	for i in list_of_freq:
+		for j in conversion:
+			if j[1] < i <= j[0]:
+				list_.append(j[2])
+
+	
+	n = 0
+	if audioData.measure == '2/4':
+		n = 8
+	if audioData.measure == '3/4':
+		n = 12
+	if audioData.measure == '4/4':
+		n = 16
+
+	final_list = []
+	j = 0
+	for m in range(len(list_)/n + 1):
+		note = list_[j] 
+		cont = 16
+		for i in range(1,n):
+			if j+i <= len(list_)-1:
+				if list_[j+i] == note:
+					cont = cont / 2
+				else:
+					final_list.append(note + str(cont/2))
+					cont = 16
+					note = list_[j+i]
+					if i+j+1 == len(list_):
+						final_list.append(note + str(cont/2))
+		
+		j = j + n
+
+	return final_list
+
+def writeFile(final_list):
+	f = open('score.ly', "w")
+
+	f.write("\score {\n\t\\version \"2.16.2\"{\n\t\t\\time 4/4\n\t\t\key c \major\n\t\t")
+	for i in (final_list):
+		f.write(i)
+		f.write(" ")
+	f.write("\n\t}\n}\n")
