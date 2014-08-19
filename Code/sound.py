@@ -1,3 +1,20 @@
+
+    # <Music score creator. Generate a sheet music from an audio.>
+    # Copyright (C) <2014>  <Jose Carlos Montanez Aragon>
+
+    # This program is free software: you can redistribute it and/or modify
+    # it under the terms of the GNU General Public License as published by
+    # the Free Software Foundation, either version 3 of the License, or
+    # (at your option) any later version.
+
+    # This program is distributed in the hope that it will be useful,
+    # but WITHOUT ANY WARRANTY; without even the implied warranty of
+    # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    # GNU General Public License for more details.
+
+    # You should have received a copy of the GNU General Public License
+    # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 import os
 import pyaudio
 import wave
@@ -199,14 +216,14 @@ def preprocessingFreqs(list_of_freq, audioData):
 	j = 0
 	for m in range(len(list_)/n + 1):
 		note = list_[j] 
-		cont = 32
+		cont = 64
 		for i in range(1,n):
 			if j+i <= len(list_)-1:
 				if list_[j+i] == note:
 					cont = cont / 2
 				else:
 					final_list.append(note + str(cont/2))
-					cont = 32
+					cont = 64
 					note = list_[j+i]
 					if i+j+1 == len(list_):
 						final_list.append(note + str(cont/2))
