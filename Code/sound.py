@@ -132,7 +132,7 @@ def play(soundfile, aData, sounddirectory):
 def audioProcessing(filename, audioData):
 	list_of_freq = getListofFreq(filename, audioData)
 	final_list = preprocessingFreqs(list_of_freq, audioData)
-	writeFile(final_list)
+	writeFile(final_list, audioData)
 	os.system("lilypond -s score.ly")
 
 
@@ -187,37 +187,41 @@ def preprocessingFreqs(list_of_freq, audioData):
 	
 	n = 0
 	if audioData.measure == '2/4':
-		n = 8
+		n = 2*int(round(audioData.quarter_note_minute*0.0667))
 	if audioData.measure == '3/4':
-		n = 12
+		n = 3*int(round(audioData.quarter_note_minute*0.0667))
 	if audioData.measure == '4/4':
-		n = 16
+		n = 4*int(round(audioData.quarter_note_minute*0.0667))
 
+#	print n
+#	print list_
 	final_list = []
 	j = 0
 	for m in range(len(list_)/n + 1):
 		note = list_[j] 
-		cont = 16
+		cont = 32
 		for i in range(1,n):
 			if j+i <= len(list_)-1:
 				if list_[j+i] == note:
 					cont = cont / 2
 				else:
 					final_list.append(note + str(cont/2))
-					cont = 16
+					cont = 32
 					note = list_[j+i]
 					if i+j+1 == len(list_):
 						final_list.append(note + str(cont/2))
 		
 		j = j + n
 
+#	print final_list
 	return final_list
 
-def writeFile(final_list):
+def writeFile(final_list, audioData):
 	f = open('score.ly', "w")
 
-	f.write("\score {\n\t\\version \"2.16.2\"{\n\t\t\\time 4/4\n\t\t\key c \major\n\t\t")
+	f.write("\score {\n\t\\version \"2.16.2\"{\n\t\t\\time 4/4\n\t\t\key c \major\n\t\t\\tempo 4 = ")
+	f.write(str(audioData.quarter_note_minute) + "\n\t\t")
 	for i in (final_list):
 		f.write(i)
 		f.write(" ")
-	f.write("\n\t}\n}\n")
+	f.write("\\bar \"|.\"\n\t}\n}\n")
