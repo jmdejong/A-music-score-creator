@@ -35,48 +35,50 @@ class AudioData():
 		self.quarter_note_minute = 60 
 		self.measure = '3/4'
 
+# Range for each note
 conversion = [(10000.0,1077.0,"r"),
-			  (1077.0,1017.1,"c''"),
-			  (1017.0,960.0,"b''"),	
-			  (960.0,906.2,"ais''"),
-			  (906.2,855.3,"a''"),
-			  (855.3,807.3,"gis''"),
-			  (807.3,762.0,"g''"),
-			  (762.0,719.2,"fis''"),
-			  (719.2,678.9,"f''"),
-			  (678.9,640.8,"e''"),
-			  (640.8,604.8,"dis''"),
-			  (604.8,570.8,"d''"),
-			  (570.8,538.8,"cis''"),
-			  (538.8,508.6,"c''"),
-			  (508.6,480.0,"b'"),
-			  (480.0,453.1,"ais'"),
-			  (453.1,427.7,"a'"),
-			  (427.7,403.6,"gis'"),
-			  (403.6,381.0,"g'"),
-			  (381.0,359.6,"fis'"),
-			  (359.6,339.4,"f'"),
-			  (339.4,320.4,"e'"),
-			  (320.4,302.4,"dis'"),
-			  (302.4,285.4,"d'"),
-			  (285.4,269.4,"cis'"),
-			  (269.4,254.3,"c'"),
-			  (254.3,240.0,"b"),
-			  (240.0,226.5,"ais"),
-			  (226.5,213.8,"a"),
-			  (213.8,201.8,"gis"),
-			  (201.8,190.5,"g"),
-			  (190.5,179.8,"fis"),
-			  (179.8,169.7,"f"),
-			  (169.7,160.2,"e"),
-			  (160.2,0.0,"r")]
+			(1077.0,1017.1,"c''"),
+			(1017.0,960.0,"b''"),	
+			(960.0,906.2,"ais''"),
+			(906.2,855.3,"a''"),
+			(855.3,807.3,"gis''"),
+			(807.3,762.0,"g''"),
+			(762.0,719.2,"fis''"),
+			(719.2,678.9,"f''"),
+			(678.9,640.8,"e''"),
+			(640.8,604.8,"dis''"),
+			(604.8,570.8,"d''"),
+			(570.8,538.8,"cis''"),
+			(538.8,508.6,"c''"),
+			(508.6,480.0,"b'"),
+			(480.0,453.1,"ais'"),
+			(453.1,427.7,"a'"),
+			(427.7,403.6,"gis'"),
+			(403.6,381.0,"g'"),
+			(381.0,359.6,"fis'"),
+			(359.6,339.4,"f'"),
+			(339.4,320.4,"e'"),
+			(320.4,302.4,"dis'"),
+			(302.4,285.4,"d'"),
+			(285.4,269.4,"cis'"),
+			(269.4,254.3,"c'"),
+			(254.3,240.0,"b"),
+			(240.0,226.5,"ais"),
+			(226.5,213.8,"a"),
+			(213.8,201.8,"gis"),
+			(201.8,190.5,"g"),
+			(190.5,179.8,"fis"),
+			(179.8,169.7,"f"),
+			(169.7,160.2,"e"),
+			(160.2,0.0,"r")]
 
 
 def tempo(audioData):
-	quarter_note = audioData.quarter_note_minute/60.0 # 
+	quarter_note = audioData.quarter_note_minute/60.0 
 	semiquaver = 4*quarter_note
 
-	# Determining the size of the chunk. That is, the number of semiquaver for second
+	# Determining the size of the chunk. 
+	# That is, the number of semiquaver for second
 	audioData.chunk = int(ceil(2530 - 200*semiquaver))
 
 	return audioData
@@ -97,16 +99,20 @@ def record(audioData):
 
 	frames = []
 
+	# Record the audio
 	for i in range(0, int(audioData.rate / audioData.chunk * audioData.record_seconds)):
 	    data = stream.read(audioData.chunk)
 	    frames.append(data) # 2 bytes(16 bits) per channel
 
 	print("* done recording")
 
+	# Setup some data
 	audioData.sample_size = p.get_sample_size(audioData.format)
 	stream.stop_stream()
-	sounddirectory = "/tmp/"+time.strftime("%H%M%S")+".wav"
 
+	# The audio is saved to work with it later
+	# We save in /tmp 
+	sounddirectory = "/tmp/"+time.strftime("%H%M%S")+".wav"
 	wf = wave.open(sounddirectory, 'wb')
 	wf.setnchannels(audioData.channels)
 	wf.setsampwidth(p.get_sample_size(audioData.format))
@@ -181,27 +187,25 @@ def getListofFreq(filename, audioData):
 	        x1 = (y2 - y0) * .5 / (2 * y1 - y2 - y0)
 	        # Find the frequency and output it
 	        thefreq = (which+x1)*RATE/audioData.chunk
-#	        print "The freq is %f Hz." % (thefreq)
 	        list_of_freq.append(thefreq)
 	    else:
 	        thefreq = which*RATE/audioData.chunk
-#	        print "The freq is %f Hz." % (thefreq)
 	        list_of_freq.append(thefreq)
 	    # Read some more data
 	    data = wf.readframes(audioData.chunk)
-
 
 	return list_of_freq
 
 def preprocessingFreqs(list_of_freq, audioData):
 
+	# Transform the original freq to the note
 	list_ = []
 	for i in list_of_freq:
 		for j in conversion:
 			if j[1] < i <= j[0]:
 				list_.append(j[2])
-
 	
+	# Calculate the number of pieces of audio per measure
 	n = 0
 	if audioData.measure == '2/4':
 		n = 2*int(round(audioData.quarter_note_minute*0.0667))
@@ -210,8 +214,8 @@ def preprocessingFreqs(list_of_freq, audioData):
 	if audioData.measure == '4/4':
 		n = 4*int(round(audioData.quarter_note_minute*0.0667))
 
-#	print n
-#	print list_
+	# From the before list, we obtain the number of repetitions of
+	# a same note
 	final_list = []
 	j = 0
 	for m in range(len(list_)/n + 1):
@@ -230,7 +234,6 @@ def preprocessingFreqs(list_of_freq, audioData):
 		
 		j = j + n
 
-#	print final_list
 	return final_list
 
 def writeFile(final_list, audioData):
@@ -242,3 +245,5 @@ def writeFile(final_list, audioData):
 		f.write(i)
 		f.write(" ")
 	f.write("\\bar \"|.\"\n\t}\n}\n")
+
+	f.close()
