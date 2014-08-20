@@ -21,7 +21,8 @@
 import os
 import wx
 import time
-from sound import *
+import music_score_creator
+from music_score_creator.sound import *
 
 def initialize():
     # Create all the variables.
@@ -81,12 +82,12 @@ class MainWindow(wx.Frame):
         vbox = wx.BoxSizer(wx.VERTICAL)
         global mainToolbar
         mainToolbar = wx.ToolBar(self)
-        toolbarOpen = mainToolbar.AddLabelTool(wx.ID_OPEN, '', wx.Bitmap('images/open32.png'))
-        toolbarSave = mainToolbar.AddLabelTool(wx.ID_SAVE, '', wx.Bitmap('images/save32.png'))
+        toolbarOpen = mainToolbar.AddLabelTool(wx.ID_OPEN, '', wx.Bitmap(music_score_creator.__path__[0] + '/images/open32.png'))
+        toolbarSave = mainToolbar.AddLabelTool(wx.ID_SAVE, '', wx.Bitmap(music_score_creator.__path__[0] + '/images/save32.png'))
         mainToolbar.AddSeparator()
-        toolbarRecord = mainToolbar.AddLabelTool(5990, '', wx.Bitmap('images/record32.png'))
-        toolbarPlay = mainToolbar.AddLabelTool(6001, '', wx.Bitmap('images/play32.png'))
-        toolbarAudioProcess = mainToolbar.AddLabelTool(6002, '', wx.Bitmap('images/pdf32.png'))
+        toolbarRecord = mainToolbar.AddLabelTool(5990, '', wx.Bitmap(music_score_creator.__path__[0] + '/images/record32.png'))
+        toolbarPlay = mainToolbar.AddLabelTool(6001, '', wx.Bitmap(music_score_creator.__path__[0] + '/images/play32.png'))
+        toolbarAudioProcess = mainToolbar.AddLabelTool(6002, '', wx.Bitmap(music_score_creator.__path__[0] + '/images/pdf32.png'))
         mainToolbar.EnableTool(wx.ID_SAVE, False) # Before we have an audio, it's deactivated.
         mainToolbar.EnableTool(6001, False)
         mainToolbar.EnableTool(6002, False)
@@ -179,7 +180,7 @@ class MainWindow(wx.Frame):
         dlg.Destroy()
 
     def OnAbout(self, e):
-        dlg = wx.MessageDialog( self, "An attempt of doing a music score creator.\nVersion 1beta - 2014\nCreated by Jose Carlos M. Aragon.\nYou can contact me via twitter: @Montagon.", "About Music score creator", wx.OK)
+        dlg = wx.MessageDialog( self, "An attempt of doing a music score creator.\nVersion 0.6beta - 2014\nCreated by Jose Carlos M. Aragon.\nYou can contact me via twitter: @Montagon.", "About Music score creator", wx.OK)
         dlg.ShowModal()
         dlg.Destroy()
 
