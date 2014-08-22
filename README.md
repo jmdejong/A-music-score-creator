@@ -30,6 +30,6 @@ For now, it's limited to a single voice. And the results can vary depending on t
 Example of use
 --------------
 
-If you want to see a working example, in this link_ you have a video.
+If you want to see a working example, in this link you have a video:
 
-.. _link: http://www.dailymotion.com/video/x2404p9_score-music-creator_tech
+http://www.dailymotion.com/video/x2404p9_score-music-creator_tech
