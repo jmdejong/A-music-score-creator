@@ -19,6 +19,7 @@ import os
 import pyaudio
 import wave
 import time
+import tempfile
 from pylab import*
 from scipy.io import wavfile
 import numpy
@@ -33,7 +34,7 @@ class AudioData():
 		self.record_seconds = 1
 		self.sample_size = 0
 		self.quarter_note_minute = 60 
-		self.measure = '3/4'
+		self.measure = '4/4'
 
 # Range for each note
 conversion = [(10000.0,1077.0,"r"),
@@ -111,8 +112,8 @@ def record(audioData):
 	stream.stop_stream()
 
 	# The audio is saved to work with it later
-	# We save in /tmp 
-	sounddirectory = "/tmp/"+time.strftime("%H%M%S")+".wav"
+	# We save in temp directory
+	sounddirectory = tempfile.gettempdir() + "/" +time.strftime("%H%M%S")+".wav"
 	wf = wave.open(sounddirectory, 'wb')
 	wf.setnchannels(audioData.channels)
 	wf.setsampwidth(p.get_sample_size(audioData.format))
@@ -154,7 +155,8 @@ def play(soundfile, aData, sounddirectory):
 
 def audioProcessing(filename, audioData):
 	list_of_freq = getListofFreq(filename, audioData)
-	final_list = preprocessingFreqs(list_of_freq, audioData)
+	list_pre = preprocessingFreqs(list_of_freq, audioData)
+	final_list = getNotes(list_pre, audioData)
 	writeFile(final_list, audioData)
 	os.system("lilypond -s score.ly")
 
@@ -204,35 +206,106 @@ def preprocessingFreqs(list_of_freq, audioData):
 		for j in conversion:
 			if j[1] < i <= j[0]:
 				list_.append(j[2])
-	
+
+	# Remove the silent notes at the begin of the audio
+	while (len(list_) > 0) and (list_[0] == 'r'):
+		list_.remove('r')
+
+	return list_
+
+def getNotes(list_, audioData):
 	# Calculate the number of pieces of audio per measure
 	n = 0
 	if audioData.measure == '2/4':
-		n = 2*int(round(audioData.quarter_note_minute*0.0667))
+		#n = 2*int(round(audioData.quarter_note_minute*0.0667))
+		n = 8
 	if audioData.measure == '3/4':
-		n = 3*int(round(audioData.quarter_note_minute*0.0667))
+		#n = 3*int(round(audioData.quarter_note_minute*0.0667))
+		n = 12
 	if audioData.measure == '4/4':
-		n = 4*int(round(audioData.quarter_note_minute*0.0667))
+		#n = 4*int(round(audioData.quarter_note_minute*0.0667))
+		n = 16
+
+	# Fill the list with silent notes ('r') to have complete measure
+	number_fill = len(list_) % n
+
+	for j in range(number_fill):
+		list_.append('r')
 
 	# From the before list, we obtain the number of repetitions of
-	# a same note
-	final_list = []
+	# a same note in every measure
+	aux_list = []
 	j = 0
-	for m in range(len(list_)/n + 1):
+	for m in range(len(list_)/n):
 		note = list_[j] 
-		cont = 64
+		cont = 1
+
 		for i in range(1,n):
-			if j+i <= len(list_)-1:
-				if list_[j+i] == note:
-					cont = cont / 2
-				else:
-					final_list.append(note + str(cont/2))
-					cont = 64
-					note = list_[j+i]
-					if i+j+1 == len(list_):
-						final_list.append(note + str(cont/2))
-		
+			if list_[j+i] == note:
+				cont = cont + 1
+			else:
+				aux_list.append((note, cont))
+				cont = 1
+				note = list_[j+i]
+
+		aux_list.append((note, cont))
+
 		j = j + n
+
+	# Once we have this list, we need to transform it to can get
+	# the appropiate notes
+
+	final_list = []
+	for m in aux_list:
+		if m[1] == 1:
+			final_list.append(m[0] + '16')
+
+		if m[1] == 2:
+			final_list.append(m[0] + '8')
+
+		if m[1] == 3:
+			final_list.append(m[0] + '8.')
+
+		if m[1] == 4:
+			final_list.append(m[0] + '4')
+
+		if m[1] == 5:
+			final_list.append(m[0] + '4')
+			final_list.append(m[0] + '16')
+
+		if m[1] == 6:
+			final_list.append(m[0] + '4.')
+
+		if m[1] == 7:
+			final_list.append(m[0] + '4..')
+
+		if m[1] == 8:
+			final_list.append(m[0] + '2')
+
+		if m[1] == 9:
+			final_list.append(m[0] + '2')
+			final_list.append(m[0] + '16')
+
+		if m[1] == 10:
+			final_list.append(m[0] + '2')
+			final_list.append(m[0] + '8')
+
+		if m[1] == 11:
+			final_list.append(m[0] + '2')
+			final_list.append(m[0] + '8')
+			final_list.append(m[0] + '16')
+
+		if m[1] == 12:
+			final_list.append(m[0] + '2.')
+		if m[1] == 13:
+			final_list.append(m[0] + '2..')
+		if m[1] == 14:
+			final_list.append(m[0] + '2...')
+		if m[1] == 15:
+			final_list.append(m[0] + '2....')
+		if m[1] == 16:
+			final_list.append(m[0] + '1')
+
 
 	return final_list
 
