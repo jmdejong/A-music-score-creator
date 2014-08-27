@@ -22,8 +22,7 @@ import os
 import wx
 import time
 import music_score_creator
-#from music_score_creator.sound import *
-from sound import *
+from music_score_creator.sound import *
 
 def initialize():
     # Create all the variables.
@@ -181,7 +180,7 @@ class MainWindow(wx.Frame):
         dlg.Destroy()
 
     def OnAbout(self, e):
-        dlg = wx.MessageDialog( self, "An attempt of doing a music score creator.\nVersion 0.7beta - 2014\nCreated by Jose Carlos M. Aragon.\nYou can contact me via twitter: @Montagon.", "About Music score creator", wx.OK)
+        dlg = wx.MessageDialog( self, "An attempt of doing a music score creator.\nVersion 0.7.1beta - 2014\nCreated by Jose Carlos M. Aragon.\nYou can contact me via twitter: @Montagon.", "About Music score creator", wx.OK)
         dlg.ShowModal()
         dlg.Destroy()
 

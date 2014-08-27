@@ -1,0 +1,22 @@
+===================
+Music Score Creator
+===================
+
+Description
+-----------
+
+It is "A music score creator", a program that, starting from a audio recorded or loaded, will generate the sheet music for that sounds. It is limited to a single instrument-voice and still as development.
+
+Installation
+------------
+
+python-wxgtk2.8
+python-pyaudio
+python-numpy
+python-matplotlib
+
+To Do
+-----
+
+Example of use
+--------------
