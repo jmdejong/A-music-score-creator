@@ -23,6 +23,7 @@ import wx
 import time
 import music_score_creator
 from music_score_creator.sound import *
+#from sound import *
 
 def initialize():
     # Create all the variables.
@@ -34,7 +35,7 @@ class MainWindow(wx.Frame):
     def __init__(self, parent, title):
         wx.Frame.__init__(self, parent, style=wx.DEFAULT_FRAME_STYLE ^ wx.RESIZE_BORDER, title=title, size=(300,300))
         initialize()
-        global menuSave, menuPlay, soundfile, audioData, menuAudioProcess, sounddirectory, tRecord
+        global menuSave, menuPlay, soundfile, audioData, menuAudioProcess, sounddirectory, tRecord, tTunning
         panel = wx.Panel(self)
 
         # Setting up the menu.
@@ -87,10 +88,13 @@ class MainWindow(wx.Frame):
         mainToolbar.AddSeparator()
         toolbarRecord = mainToolbar.AddLabelTool(5990, '', wx.Bitmap(music_score_creator.__path__[0] + '/images/record32.png'))
         toolbarPlay = mainToolbar.AddLabelTool(6001, '', wx.Bitmap(music_score_creator.__path__[0] + '/images/play32.png'))
+        mainToolbar.AddSeparator()
         toolbarAudioProcess = mainToolbar.AddLabelTool(6002, '', wx.Bitmap(music_score_creator.__path__[0] + '/images/pdf32.png'))
+        toolbarPlayMidi = mainToolbar.AddLabelTool(6003, '', wx.Bitmap(music_score_creator.__path__[0] + '/images/play32.png'))
         mainToolbar.EnableTool(wx.ID_SAVE, False) # Before we have an audio, it's deactivated.
         mainToolbar.EnableTool(6001, False)
         mainToolbar.EnableTool(6002, False)
+        mainToolbar.EnableTool(6003, False)
         mainToolbar.Realize()
 
         # Set events of the toolbar
@@ -100,6 +104,7 @@ class MainWindow(wx.Frame):
         self.Bind(wx.EVT_MENU, self.OnPlay, toolbarPlay)
         self.Bind(wx.EVT_MENU, self.OnAudioProcess, toolbarAudioProcess)
         self.Bind(wx.EVT_MENU, self.OnSave, toolbarSave)
+        self.Bind(wx.EVT_MENU, self.OnPlayMidi, toolbarPlayMidi)
 
         vbox.Add(mainToolbar, 0, wx.EXPAND)
 
@@ -120,11 +125,18 @@ class MainWindow(wx.Frame):
         cb_measure = wx.ComboBox(self, value=('4/4'), pos=(209, 150), size=(80, 28), choices=measures, 
             style=wx.CB_READONLY)
 
+        tTunning = wx.TextCtrl(self, -1, pos=(209, 190), value="440")
+        wx.StaticText(self, label=("Tunning"), pos=(10, 194))
+
+        cb_midi = wx.CheckBox(self, label="Generate MIDI", pos=(10, 234))
+
 
         # Events of the block
 
         self.Bind(wx.EVT_COMBOBOX, self.OnTempo, cb_tempo)
         self.Bind(wx.EVT_COMBOBOX, self.OnMeasure, cb_measure)
+        self.Bind(wx.EVT_CHECKBOX, self.OnMidi, cb_midi)
+        #self.Bind(wx.Ev)
 
         self.SetSizer(vbox)
 
@@ -166,8 +178,11 @@ class MainWindow(wx.Frame):
 
     def OnAudioProcess(self, e):
         #Add interaction to save the file. In test, only the path to the file to process
-        global sounddirectory
+        global sounddirectory, tTunning, audioData
+        audioData = updateConversionList(audioData, int(tTunning.GetValue()))
         audioProcessing(sounddirectory, audioData)
+        if audioData.midi == 1:
+            mainToolbar.EnableTool(6003, True)
 
     def OnSave(self, e):
         global soundfile, audioData
@@ -180,7 +195,7 @@ class MainWindow(wx.Frame):
         dlg.Destroy()
 
     def OnAbout(self, e):
-        dlg = wx.MessageDialog( self, "An attempt of doing a music score creator.\nVersion 0.7.1beta - 2014\nCreated by Jose Carlos M. Aragon.\nYou can contact me via twitter: @Montagon.", "About Music score creator", wx.OK)
+        dlg = wx.MessageDialog( self, "An attempt of doing a music score creator.\nVersion 0.8beta - 2014\nCreated by Jose Carlos M. Aragon.\nYou can contact me via twitter: @Montagon.", "About Music score creator", wx.OK)
         dlg.ShowModal()
         dlg.Destroy()
 
@@ -198,6 +213,17 @@ class MainWindow(wx.Frame):
     def OnMeasure(self, e):
         global audioData
         audioData.measure = e.GetString()
+
+    def OnMidi(self, e):
+        global audioData
+        audioData.midi = 1
+
+    def OnPlayMidi(self, e):
+        global audioData
+        pygame.mixer.init(audioData.rate, audioData.format, audioData.channels, audioData.chunk)
+        pygame.mixer.music.load("score.midi")
+        pygame.mixer.music.play()
+
 
 app = wx.App(False)
 frame = MainWindow(None, "Music score creator")

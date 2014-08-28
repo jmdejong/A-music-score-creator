@@ -16,11 +16,12 @@ python-pyaudio
 python-numpy
 python-matplotlib
 python-scipy
+python-pygame
 lilypond
 
 In Debian systems, you can install it like this:
 
-sudo apt-get install python-wxgtk2.8 python-pyaudio python-numpy python-matplotlib python-scipy lilypond
+sudo apt-get install python-wxgtk2.8 python-pyaudio python-numpy python-matplotlib python-scipy lilypond python-pygame
 
 To Do
 -----
@@ -30,15 +31,16 @@ For now, it's limited to a single voice. And the results can vary depending on t
 - Add Windows/Mac support.
 - Add possibility of change the instrument.
 
-Changelog 0.7
--------------
-
-- New method to obtain the duration of the notes.
-- Steps for multiplatform support.
-
 Example of use
 --------------
 
 If you want to see a working example, in this link_ you have a video.
 
 .. _link: http://www.dailymotion.com/video/x2404p9_score-music-creator_tech
+
+Changelog 0.8
+---------------
+
+- Added method to change the tune
+- Generate midi
+- Play the midi

@@ -20,10 +20,14 @@ import pyaudio
 import wave
 import time
 import tempfile
+import pygame
 from pylab import*
 from scipy.io import wavfile
 import numpy
 
+
+# Class that stores values for the proper treatment of time,
+# recording settings and more.
 class AudioData():
 	def __init__(self):
 		self.channels = 1
@@ -35,45 +39,45 @@ class AudioData():
 		self.sample_size = 0
 		self.quarter_note_minute = 60 
 		self.measure = '4/4'
+		self.midi = 0
+		self.conversion = [(10000.0,1077.0,"r"),
+						(1077.0,1017.1,"c'''"),
+						(1017.0,960.0,"b''"),	
+						(960.0,906.2,"ais''"),
+						(906.2,855.3,"a''"),
+						(855.3,807.3,"gis''"),
+						(807.3,762.0,"g''"),
+						(762.0,719.2,"fis''"),
+						(719.2,678.9,"f''"),
+						(678.9,640.8,"e''"),
+						(640.8,604.8,"dis''"),
+						(604.8,570.8,"d''"),
+						(570.8,538.8,"cis''"),
+						(538.8,508.6,"c''"),
+						(508.6,480.0,"b'"),
+						(480.0,453.1,"ais'"),
+						(453.1,427.7,"a'"),
+						(427.7,403.6,"gis'"),
+						(403.6,381.0,"g'"),
+						(381.0,359.6,"fis'"),
+						(359.6,339.4,"f'"),
+						(339.4,320.4,"e'"),
+						(320.4,302.4,"dis'"),
+						(302.4,285.4,"d'"),
+						(285.4,269.4,"cis'"),
+						(269.4,254.3,"c'"),
+						(254.3,240.0,"b"),
+						(240.0,226.5,"ais"),
+						(226.5,213.8,"a"),
+						(213.8,201.8,"gis"),
+						(201.8,190.5,"g"),
+						(190.5,179.8,"fis"),
+						(179.8,169.7,"f"),
+						(169.7,160.2,"e"),
+						(160.2,0.0,"r")]
 
-# Range for each note
-conversion = [(10000.0,1077.0,"r"),
-			(1077.0,1017.1,"c'''"),
-			(1017.0,960.0,"b''"),	
-			(960.0,906.2,"ais''"),
-			(906.2,855.3,"a''"),
-			(855.3,807.3,"gis''"),
-			(807.3,762.0,"g''"),
-			(762.0,719.2,"fis''"),
-			(719.2,678.9,"f''"),
-			(678.9,640.8,"e''"),
-			(640.8,604.8,"dis''"),
-			(604.8,570.8,"d''"),
-			(570.8,538.8,"cis''"),
-			(538.8,508.6,"c''"),
-			(508.6,480.0,"b'"),
-			(480.0,453.1,"ais'"),
-			(453.1,427.7,"a'"),
-			(427.7,403.6,"gis'"),
-			(403.6,381.0,"g'"),
-			(381.0,359.6,"fis'"),
-			(359.6,339.4,"f'"),
-			(339.4,320.4,"e'"),
-			(320.4,302.4,"dis'"),
-			(302.4,285.4,"d'"),
-			(285.4,269.4,"cis'"),
-			(269.4,254.3,"c'"),
-			(254.3,240.0,"b"),
-			(240.0,226.5,"ais"),
-			(226.5,213.8,"a"),
-			(213.8,201.8,"gis"),
-			(201.8,190.5,"g"),
-			(190.5,179.8,"fis"),
-			(179.8,169.7,"f"),
-			(169.7,160.2,"e"),
-			(160.2,0.0,"r")]
 
-
+# 
 def tempo(audioData):
 	quarter_note = audioData.quarter_note_minute/60.0 
 	semiquaver = 4*quarter_note
@@ -83,8 +87,6 @@ def tempo(audioData):
 	audioData.chunk = int(ceil(2530 - 200*semiquaver))
 
 	return audioData
-
-
 
 def record(audioData):
 	global sounddirectory
@@ -101,7 +103,8 @@ def record(audioData):
 	frames = []
 
 	# Record the audio
-	for i in range(0, int(audioData.rate / audioData.chunk * audioData.record_seconds)):
+	for i in range(0, int(audioData.rate / audioData.chunk * 
+					audioData.record_seconds)):
 	    data = stream.read(audioData.chunk)
 	    frames.append(data) # 2 bytes(16 bits) per channel
 
@@ -198,12 +201,23 @@ def getListofFreq(filename, audioData):
 
 	return list_of_freq
 
+def updateConversionList(audioData, tempo):
+	dif = 440 - tempo
+
+	conversion = []
+	for aux in audioData.conversion:
+		conversion.append( (aux[0] + dif, aux[1] + dif, aux[2]) )
+
+	audioData.conversion = conversion
+
+	return audioData
+
 def preprocessingFreqs(list_of_freq, audioData):
 
 	# Transform the original freq to the note
 	list_ = []
 	for i in list_of_freq:
-		for j in conversion:
+		for j in audioData.conversion:
 			if j[1] < i <= j[0]:
 				list_.append(j[2])
 
@@ -270,8 +284,8 @@ def getNotes(list_, audioData):
 			final_list.append(m[0] + '4')
 
 		if m[1] == 5:
-			final_list.append(m[0] + '4')
-			final_list.append(m[0] + '16')
+			final_list.append(m[0] + '4' + "\\(")
+			final_list.append(m[0] + '16' + "\\)")
 
 		if m[1] == 6:
 			final_list.append(m[0] + '4.')
@@ -283,17 +297,17 @@ def getNotes(list_, audioData):
 			final_list.append(m[0] + '2')
 
 		if m[1] == 9:
-			final_list.append(m[0] + '2')
-			final_list.append(m[0] + '16')
+			final_list.append(m[0] + '2' + "\\(")
+			final_list.append(m[0] + '16' + "\\)")
 
 		if m[1] == 10:
-			final_list.append(m[0] + '2')
-			final_list.append(m[0] + '8')
+			final_list.append(m[0] + '2' + "\\(")
+			final_list.append(m[0] + '8' + "\\)")
 
 		if m[1] == 11:
-			final_list.append(m[0] + '2')
+			final_list.append(m[0] + '2' + "\\(")
 			final_list.append(m[0] + '8')
-			final_list.append(m[0] + '16')
+			final_list.append(m[0] + '16' + "\\)")
 
 		if m[1] == 12:
 			final_list.append(m[0] + '2.')
@@ -312,11 +326,18 @@ def getNotes(list_, audioData):
 def writeFile(final_list, audioData):
 	f = open('score.ly', "w")
 
-	f.write("\score {\n\t\\version \"2.16.2\"{\n\t\t\\time 4/4\n\t\t\key c \major\n\t\t\\tempo 4 = ")
+	f.write("\score {\n\t\\version \"2.16.2\"{\n\t\t\\time 4/4")
+	f.write("\n\t\t\key c \major\n\t\t\\tempo 4 = ")
 	f.write(str(audioData.quarter_note_minute) + "\n\t\t")
 	for i in (final_list):
 		f.write(i)
 		f.write(" ")
-	f.write("\\bar \"|.\"\n\t}\n}\n")
+	f.write("\\bar \"|.\"\n\t}")
+
+	if audioData.midi == 1:
+		f.write("\n\t\\layout{}")
+		f.write("\n\t\\midi{}")
+
+	f.write("\n}\n")
 
 	f.close()
