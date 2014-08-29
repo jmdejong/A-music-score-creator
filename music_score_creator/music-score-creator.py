@@ -35,7 +35,8 @@ class MainWindow(wx.Frame):
     def __init__(self, parent, title):
         wx.Frame.__init__(self, parent, style=wx.DEFAULT_FRAME_STYLE ^ wx.RESIZE_BORDER, title=title, size=(300,300))
         initialize()
-        global menuSave, menuPlay, soundfile, audioData, menuAudioProcess, sounddirectory, tRecord, tTunning
+        global menuSave, menuPlay, soundfile, audioData, menuAudioProcess
+        global sounddirectory, tRecord, tTunning, menuPlayMidi
         panel = wx.Panel(self)
 
         # Setting up the menu.
@@ -55,8 +56,10 @@ class MainWindow(wx.Frame):
         menuRecord = soundmenu.Append(wx.ID_ANY, "&Record", "Record an audio")
         menuPlay = soundmenu.Append(wx.ID_ANY, "Play", "Play an audio")
         menuAudioProcess = soundmenu.Append(wx.ID_ANY, "Generate PDF", "Generate PDF from audio")
+        menuPlayMidi = soundmenu.Append(wx.ID_ANY, "Play MIDI", "Play MIDI")
         menuPlay.Enable(False)
         menuAudioProcess.Enable(False)
+        menuPlayMidi.Enable(False)
 
         # --- Help menu ---
         menuAbout = helpmenu.Append(wx.ID_ABOUT, "&About"," Information about this program")
@@ -178,11 +181,15 @@ class MainWindow(wx.Frame):
 
     def OnAudioProcess(self, e):
         #Add interaction to save the file. In test, only the path to the file to process
-        global sounddirectory, tTunning, audioData
+        global sounddirectory, tTunning, audioData, menuPlayMidi
         audioData = updateConversionList(audioData, int(tTunning.GetValue()))
         audioProcessing(sounddirectory, audioData)
         if audioData.midi == 1:
             mainToolbar.EnableTool(6003, True)
+            menuPlayMidi.Enable(True)
+        if audioData.midi == 0:
+            mainToolbar.EnableTool(6003, False)
+            menuPlayMidi.Enable(False)
 
     def OnSave(self, e):
         global soundfile, audioData
@@ -216,7 +223,13 @@ class MainWindow(wx.Frame):
 
     def OnMidi(self, e):
         global audioData
-        audioData.midi = 1
+        sender = e.GetEventObject()
+        isChecked = sender.GetValue()
+
+        if isChecked:
+            audioData.midi = 1
+        else:
+            audioData.midi = 0
 
     def OnPlayMidi(self, e):
         global audioData

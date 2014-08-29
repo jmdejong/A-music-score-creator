@@ -38,9 +38,7 @@ If you want to see a working example, in this link_ you have a video.
 
 .. _link: http://www.dailymotion.com/video/x2404p9_score-music-creator_tech
 
-Changelog 0.8
+Changelog 0.8.1
 ---------------
 
-- Added method to change the tune
-- Generate midi
-- Play the midi
+- Little problems fixed
