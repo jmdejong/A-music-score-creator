@@ -40,6 +40,7 @@ class AudioData():
 		self.quarter_note_minute = 60 
 		self.measure = '4/4'
 		self.midi = 0
+		self.instrument = "Piano"
 		self.conversion = [(10000.0,1077.0,"r"),
 						(1077.0,1017.1,"c'''"),
 						(1017.0,960.0,"b''"),	
@@ -75,6 +76,13 @@ class AudioData():
 						(179.8,169.7,"f"),
 						(169.7,160.2,"e"),
 						(160.2,0.0,"r")]
+
+
+instrument_conversion = {"Clarinet": "a b", 
+                        "Flute": "a a", 
+                        "Trumpet": "a a",
+                        "Piano": "a a",
+                        "Alto Saxo": "a fis"}
 
 
 # 
@@ -320,19 +328,24 @@ def getNotes(list_, audioData):
 		if m[1] == 16:
 			final_list.append(m[0] + '1')
 
-
 	return final_list
 
 def writeFile(final_list, audioData):
 	f = open('score.ly', "w")
 
-	f.write("\score {\n\t\\version \"2.16.2\"{\n\t\t\\time 4/4")
-	f.write("\n\t\t\key c \major\n\t\t\\tempo 4 = ")
-	f.write(str(audioData.quarter_note_minute) + "\n\t\t")
+	f.write("\score {\n")
+	f.write("\t\\version \"2.16.2\"{\n")
+	f.write("\t\t\\transpose ")
+	f.write(instrument_conversion[audioData.instrument])
+	f.write("{\n")
+	f.write("\t\t\t\\time 4/4")
+	f.write("\n\t\t\t\key c \major\n\t\t\\tempo 4 = ")
+	f.write(str(audioData.quarter_note_minute) + "\n\t\t\t")
 	for i in (final_list):
 		f.write(i)
 		f.write(" ")
-	f.write("\\bar \"|.\"\n\t}")
+	f.write("\\bar \"|.\"\n\t\t}")
+	f.write("\n\t}")
 
 	if audioData.midi == 1:
 		f.write("\n\t\\layout{}")

@@ -33,7 +33,7 @@ def initialize():
 
 class MainWindow(wx.Frame):
     def __init__(self, parent, title):
-        wx.Frame.__init__(self, parent, style=wx.DEFAULT_FRAME_STYLE ^ wx.RESIZE_BORDER, title=title, size=(300,300))
+        wx.Frame.__init__(self, parent, style=wx.DEFAULT_FRAME_STYLE ^ wx.RESIZE_BORDER, title=title, size=(300,320))
         initialize()
         global menuSave, menuPlay, soundfile, audioData, menuAudioProcess
         global sounddirectory, tRecord, tTunning, menuPlayMidi
@@ -80,6 +80,7 @@ class MainWindow(wx.Frame):
         self.Bind(wx.EVT_MENU, self.OnAudioProcess, menuAudioProcess)
         self.Bind(wx.EVT_MENU, self.OnOpen, menuOpen)
         self.Bind(wx.EVT_MENU, self.OnSave, menuSave)
+        self.Bind(wx.EVT_MENU, self.OnPlayMidi, menuPlayMidi)
 
 
         # Creating the toolbar
@@ -112,26 +113,31 @@ class MainWindow(wx.Frame):
         vbox.Add(mainToolbar, 0, wx.EXPAND)
 
         # 
+
+        instruments = ["Piano", "Clarinet", "Flute", "Trumpet", "Alto Saxo"]
+        wx.StaticText(self, label=("Instrument"), pos=(10, 74))
+        cb_instrument = wx.ComboBox(self, value=("Piano"), pos=(169, 70), size=(120, 28), choices=instruments, style=wx.CB_READONLY)
+
         tempos = ['60', '90', '120', '150']
-        wx.StaticText(self, label=("Tempo"), pos=(10, 74))
-        cb_tempo = wx.ComboBox(self, value=('60'), pos=(209, 70), size=(80, 28), choices=tempos, 
+        wx.StaticText(self, label=("Tempo"), pos=(10, 114))
+        cb_tempo = wx.ComboBox(self, value=('60'), pos=(209, 110), size=(80, 28), choices=tempos, 
             style=wx.CB_READONLY)
 
         wx.StaticLine(self, pos=(0, 50), size=(300,1))
 
-        tRecord = wx.TextCtrl(self,-1, pos=(209, 110), value="2")
-        wx.StaticText(self, label=("Recording time (seconds)"), pos=(10, 114))
+        tRecord = wx.TextCtrl(self,-1, pos=(209, 150), value="2")
+        wx.StaticText(self, label=("Recording time (seconds)"), pos=(10, 154))
         #wx.StaticText(self, label=("seconds"), pos=(210, 114))
 
         measures = ['2/4', '3/4', '4/4']
-        wx.StaticText(self, label=("Measure"), pos=(10, 154))
-        cb_measure = wx.ComboBox(self, value=('4/4'), pos=(209, 150), size=(80, 28), choices=measures, 
+        wx.StaticText(self, label=("Measure"), pos=(10, 194))
+        cb_measure = wx.ComboBox(self, value=('4/4'), pos=(209, 190), size=(80, 28), choices=measures, 
             style=wx.CB_READONLY)
 
-        tTunning = wx.TextCtrl(self, -1, pos=(209, 190), value="440")
-        wx.StaticText(self, label=("Tunning"), pos=(10, 194))
+        tTunning = wx.TextCtrl(self, -1, pos=(209, 230), value="440")
+        wx.StaticText(self, label=("Tunning"), pos=(10, 234))
 
-        cb_midi = wx.CheckBox(self, label="Generate MIDI", pos=(10, 234))
+        cb_midi = wx.CheckBox(self, label="Generate MIDI", pos=(10, 274))
 
 
         # Events of the block
@@ -139,6 +145,7 @@ class MainWindow(wx.Frame):
         self.Bind(wx.EVT_COMBOBOX, self.OnTempo, cb_tempo)
         self.Bind(wx.EVT_COMBOBOX, self.OnMeasure, cb_measure)
         self.Bind(wx.EVT_CHECKBOX, self.OnMidi, cb_midi)
+        self.Bind(wx.EVT_COMBOBOX, self.OnInstrument, cb_instrument)
         #self.Bind(wx.Ev)
 
         self.SetSizer(vbox)
@@ -202,7 +209,7 @@ class MainWindow(wx.Frame):
         dlg.Destroy()
 
     def OnAbout(self, e):
-        dlg = wx.MessageDialog( self, "An attempt of doing a music score creator.\nVersion 0.8beta - 2014\nCreated by Jose Carlos M. Aragon.\nYou can contact me via twitter: @Montagon.", "About Music score creator", wx.OK)
+        dlg = wx.MessageDialog( self, "An attempt of doing a music score creator.\nVersion 0.9beta - 2014\nCreated by Jose Carlos M. Aragon.\nYou can contact me via twitter: @Montagon.", "About Music score creator", wx.OK)
         dlg.ShowModal()
         dlg.Destroy()
 
@@ -236,6 +243,10 @@ class MainWindow(wx.Frame):
         pygame.mixer.init(audioData.rate, audioData.format, audioData.channels, audioData.chunk)
         pygame.mixer.music.load("score.midi")
         pygame.mixer.music.play()
+
+    def OnInstrument(self, e):
+        global audioData
+        audioData.instrument = e.GetString()
 
 
 app = wx.App(False)
