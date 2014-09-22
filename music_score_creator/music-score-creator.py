@@ -33,7 +33,7 @@ def initialize():
 
 class MainWindow(wx.Frame):
     def __init__(self, parent, title):
-        wx.Frame.__init__(self, parent, style=wx.DEFAULT_FRAME_STYLE ^ wx.RESIZE_BORDER, title=title, size=(300,320))
+        wx.Frame.__init__(self, parent, style=wx.DEFAULT_FRAME_STYLE ^ wx.RESIZE_BORDER, title=title, size=(300,350))
         initialize()
         global menuSave, menuPlay, soundfile, audioData, menuAudioProcess
         global sounddirectory, tRecord, tTunning, menuPlayMidi
@@ -135,9 +135,13 @@ class MainWindow(wx.Frame):
             style=wx.CB_READONLY)
 
         tTunning = wx.TextCtrl(self, -1, pos=(209, 230), value="440")
-        wx.StaticText(self, label=("Tunning"), pos=(10, 234))
+        wx.StaticText(self, label=("Tuning"), pos=(10, 234))
 
-        cb_midi = wx.CheckBox(self, label="Generate MIDI", pos=(10, 274))
+        notes = ['Semibreve', 'Minim', 'Crotchet', 'Quaver', 'Semiquaver']
+        tMinimumNote = wx.StaticText(self, label=("Minimum note"), pos=(10, 274))
+        cb_minimumNote = wx.ComboBox(self, value=('Semiquaver'), pos=(159, 270), size=(130, 28), choices=notes)
+
+        cb_midi = wx.CheckBox(self, label="Generate MIDI", pos=(10, 314))
 
 
         # Events of the block
@@ -146,6 +150,7 @@ class MainWindow(wx.Frame):
         self.Bind(wx.EVT_COMBOBOX, self.OnMeasure, cb_measure)
         self.Bind(wx.EVT_CHECKBOX, self.OnMidi, cb_midi)
         self.Bind(wx.EVT_COMBOBOX, self.OnInstrument, cb_instrument)
+        self.Bind(wx.EVT_COMBOBOX, self.OnMinimumNote, cb_minimumNote)
         #self.Bind(wx.Ev)
 
         self.SetSizer(vbox)
@@ -247,6 +252,16 @@ class MainWindow(wx.Frame):
     def OnInstrument(self, e):
         global audioData
         audioData.instrument = e.GetString()
+
+    def OnMinimumNote(self, e):
+        global audioData
+        note_conversion =  {"Semibreve": 16,
+                            "Minim": 8,
+                            "Crotchet": 4,
+                            "Quaver": 2,
+                            "Semiquaver": 1}
+        audioData.minimum_note = note_conversion[e.GetString()]
+
 
 
 app = wx.App(False)

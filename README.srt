@@ -31,6 +31,10 @@ For now, it's limited to a single voice. And the results can vary depending on t
 - Add Windows/Mac support.
 - Add possibility of change the instrument.
 
+How it looks
+------------
+.. image:: https://cloud.githubusercontent.com/assets/1224818/4094605/feb643e8-2fa9-11e4-9a5b-989b1bcab06e.png
+
 Example of use
 --------------
 

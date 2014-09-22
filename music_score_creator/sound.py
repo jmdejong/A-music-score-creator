@@ -41,6 +41,7 @@ class AudioData():
 		self.measure = '4/4'
 		self.midi = 0
 		self.instrument = "Piano"
+		self.minimum_note = 1
 		self.conversion = [(10000.0,1077.0,"r"),
 						(1077.0,1017.1,"c'''"),
 						(1017.0,960.0,"b''"),	
@@ -84,11 +85,10 @@ instrument_conversion = {"Clarinet": "a b",
                         "Piano": "a a",
                         "Alto Saxo": "a fis"}
 
-
 # 
 def tempo(audioData):
 	quarter_note = audioData.quarter_note_minute/60.0 
-	semiquaver = 4*quarter_note
+	semiquaver = 4*audioData.minimum_note*quarter_note
 
 	# Determining the size of the chunk. 
 	# That is, the number of semiquaver for second
@@ -273,6 +273,20 @@ def getNotes(list_, audioData):
 		aux_list.append((note, cont))
 
 		j = j + n
+
+	j = 0
+	aux_list2 = []
+	for m in aux_list:
+
+		if m[1] >= audioData.minimum_note:
+			aux_list2.append((m[0], m[1]))
+		else:
+			if (audioData.minimum_note - m[1]) > (audioData.minimum_note / 2):
+				aux_list2.append((m[0], audioData.minimum_note))
+			else:
+				aux_list2.append(('r', audioData.minimum_note))
+
+	aux_list = aux_list2
 
 	# Once we have this list, we need to transform it to can get
 	# the appropiate notes
