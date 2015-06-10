@@ -24,6 +24,7 @@ import pygame
 from pylab import*
 from scipy.io import wavfile
 import numpy
+from frequency import *
 
 
 # Class that stores values for the proper treatment of time,
@@ -42,6 +43,7 @@ class AudioData():
 		self.midi = 0
 		self.instrument = "Piano"
 		self.minimum_note = 1
+		"""
 		self.conversion = [(10000.0,1077.0,"r"),
 						(1077.0,1017.1,"c'''"),
 						(1017.0,960.0,"b''"),	
@@ -77,6 +79,7 @@ class AudioData():
 						(179.8,169.7,"f"),
 						(169.7,160.2,"e"),
 						(160.2,0.0,"r")]
+		"""
 
 
 instrument_conversion = {"Clarinet": "a b", 
@@ -85,7 +88,7 @@ instrument_conversion = {"Clarinet": "a b",
                         "Piano": "a a",
                         "Alto Saxo": "a fis"}
 
-# 
+
 def tempo(audioData):
 	quarter_note = audioData.quarter_note_minute/60.0 
 	semiquaver = 4*audioData.minimum_note*quarter_note
@@ -171,6 +174,20 @@ def audioProcessing(filename, audioData):
 	writeFile(final_list, audioData)
 	os.system("lilypond -s score.ly")
 
+def getLowerBound(wf):
+	print wf.getnframes()
+	data = wf.readframes(wf.getnframes())
+	swidth = wf.getsampwidth()
+	indata = numpy.array(wave.struct.unpack("%dh"%(len(data)/swidth),data))
+	fftData = abs(numpy.fft.rfft(indata))**2
+
+	maximum = fftData[1:].argmax() + 1
+	minimum = fftData[1:].argmin() + 1
+
+	bound = minimum * 0.7
+
+	return bound
+
 
 def getListofFreq(filename, audioData):
 	wf = wave.open(filename, 'rb')
@@ -183,41 +200,71 @@ def getListofFreq(filename, audioData):
 
 	# Read some data
 	data = wf.readframes(audioData.chunk)
+
+	#lowerBound = getLowerBound(wf)
+	#print ("lowerbound " + str(lowerBound))
 	# Find the frequency of each chunk
 	list_of_freq = []
+	cont = 0
 	while len(data) == audioData.chunk*swidth:
 
 	    # Unpack the data and times by the hamming window
-	    indata = numpy.array(wave.struct.unpack("%dh"%(len(data)/swidth),\
+		indata = numpy.array(wave.struct.unpack("%dh"%(len(data)/swidth),\
 	                                         data))*window
+
 	    # Take the fft and square each value
-	    fftData=abs(numpy.fft.rfft(indata))**2
+		fftData=abs(numpy.fft.rfft(indata))**2
+		
 	    # Find the maximum
-	    which = fftData[1:].argmax() + 1
+		which = fftData[1:].argmax() + 1
+	    #print fftData[which]
+		cont += 1
+
+		whichs = numpy.argwhere(fftData[1:]>0.95*fftData[which]) + 1
+	    #print str(cont) + ": " + str(len(whichs)) + ",  " + str(which)
+	    #print which
 	    # Use quadratic interpolation around the max
-	    if which != len(fftData)-1:
-	        y0,y1,y2 = numpy.log(fftData[which-1:which+2:])
-	        x1 = (y2 - y0) * .5 / (2 * y1 - y2 - y0)
-	        # Find the frequency and output it
-	        thefreq = (which+x1)*RATE/audioData.chunk
-	        list_of_freq.append(thefreq)
-	    else:
-	        thefreq = which*RATE/audioData.chunk
-	        list_of_freq.append(thefreq)
+		if which != len(fftData)-1:
+			y0,y1,y2 = numpy.log(fftData[which-1:which+2:])
+			x1 = (y2 - y0) * .5 / (2 * y1 - y2 - y0)
+			# Find the frequency and output it
+			thefreq = (which+x1)*RATE/audioData.chunk
+	        #print thefreq
+			list_of_freq.append(thefreq)
+		else:
+			thefreq = which*RATE/audioData.chunk
+	        #print thefreq
+			list_of_freq.append(thefreq)
+		#print "Iteracion " + str(cont)
+		for i in whichs:
+			
+			if i != len(fftData)-1:
+				y0,y1,y2 = numpy.log(fftData[i-1:i+2:])
+				x1 = (y2 - y0) * .5 / (2 * y1 - y2 - y0)
+		        # Find the frequency and output it
+				thefreq = (i+x1)*RATE/audioData.chunk
+				#print thefreq
+		        #list_of_freq.append(thefreq)
+			else:
+				thefreq = i*RATE/audioData.chunk
+				#print thefreq
+		        #list_of_freq.append(thefreq)
+
 	    # Read some more data
-	    data = wf.readframes(audioData.chunk)
+		data = wf.readframes(audioData.chunk)
 
 	return list_of_freq
 
 def updateConversionList(audioData, tempo):
+	"""
 	dif = 440 - tempo
 
 	conversion = []
 	for aux in audioData.conversion:
 		conversion.append( (aux[0] + dif, aux[1] + dif, aux[2]) )
 
-	audioData.conversion = conversion
-
+	#audioData.conversion = conversion
+	"""
 	return audioData
 
 def preprocessingFreqs(list_of_freq, audioData):
@@ -225,9 +272,7 @@ def preprocessingFreqs(list_of_freq, audioData):
 	# Transform the original freq to the note
 	list_ = []
 	for i in list_of_freq:
-		for j in audioData.conversion:
-			if j[1] < i <= j[0]:
-				list_.append(j[2])
+		list_.append( getNote( getNotefromFrequency(i) ) )
 
 	# Remove the silent notes at the begin of the audio
 	while (len(list_) > 0) and (list_[0] == 'r'):

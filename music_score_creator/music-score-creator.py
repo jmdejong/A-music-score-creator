@@ -22,8 +22,8 @@ import os
 import wx
 import time
 import music_score_creator
-from music_score_creator.sound import *
-#from sound import *
+#from music_score_creator.sound import *
+from sound import *
 
 def initialize():
     # Create all the variables.
