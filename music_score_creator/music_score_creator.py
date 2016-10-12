@@ -21,7 +21,7 @@
 import os
 import wx
 import time
-import music_score_creator
+#import music_score_creator
 #from music_score_creator.sound import *
 from sound import *
 
@@ -87,14 +87,14 @@ class MainWindow(wx.Frame):
         vbox = wx.BoxSizer(wx.VERTICAL)
         global mainToolbar
         mainToolbar = wx.ToolBar(self)
-        toolbarOpen = mainToolbar.AddLabelTool(wx.ID_OPEN, '', wx.Bitmap(music_score_creator.__path__[0] + '/images/open32.png'))
-        toolbarSave = mainToolbar.AddLabelTool(wx.ID_SAVE, '', wx.Bitmap(music_score_creator.__path__[0] + '/images/save32.png'))
+        toolbarOpen = mainToolbar.AddLabelTool(wx.ID_OPEN, '', wx.Bitmap('images/open32.png'))
+        toolbarSave = mainToolbar.AddLabelTool(wx.ID_SAVE, '', wx.Bitmap('images/save32.png'))
         mainToolbar.AddSeparator()
-        toolbarRecord = mainToolbar.AddLabelTool(5990, '', wx.Bitmap(music_score_creator.__path__[0] + '/images/record32.png'))
-        toolbarPlay = mainToolbar.AddLabelTool(6001, '', wx.Bitmap(music_score_creator.__path__[0] + '/images/play32.png'))
+        toolbarRecord = mainToolbar.AddLabelTool(5990, '', wx.Bitmap('images/record32.png'))
+        toolbarPlay = mainToolbar.AddLabelTool(6001, '', wx.Bitmap('images/play32.png'))
         mainToolbar.AddSeparator()
-        toolbarAudioProcess = mainToolbar.AddLabelTool(6002, '', wx.Bitmap(music_score_creator.__path__[0] + '/images/pdf32.png'))
-        toolbarPlayMidi = mainToolbar.AddLabelTool(6003, '', wx.Bitmap(music_score_creator.__path__[0] + '/images/play32.png'))
+        toolbarAudioProcess = mainToolbar.AddLabelTool(6002, '', wx.Bitmap('images/pdf32.png'))
+        toolbarPlayMidi = mainToolbar.AddLabelTool(6003, '', wx.Bitmap('images/play32.png'))
         mainToolbar.EnableTool(wx.ID_SAVE, False) # Before we have an audio, it's deactivated.
         mainToolbar.EnableTool(6001, False)
         mainToolbar.EnableTool(6002, False)
@@ -179,7 +179,7 @@ class MainWindow(wx.Frame):
         global soundfile,menuSave, menuPlay, menuAudioProcess, audioData, sounddirectory
         global tRecord
         mainToolbar.EnableTool(5990, False)
-        time.sleep(3)
+        #time.sleep(3)
         audioData.record_seconds = int(tRecord.GetValue())
         (soundfile, frames, sounddirectory) = record(audioData)
         audioData.frames = frames
