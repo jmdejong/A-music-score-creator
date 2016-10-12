@@ -19,5 +19,5 @@ In Debian system, you can write:
 
 Then, to launch the program, you can do this:
 
-	- Give it execution permissions and then: $ ./main.py
+	- Give it execution permissions and then: $ ./music_score_creator.py
 	- Execute with: $ python main.py

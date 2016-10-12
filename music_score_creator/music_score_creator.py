@@ -2,6 +2,7 @@
 
     # <Music score creator. Generate a sheet music from an audio.>
     # Copyright (C) <2014>  <Jose Carlos Montanez Aragon>
+    # Modified by Troido
 
     # This program is free software: you can redistribute it and/or modify
     # it under the terms of the GNU General Public License as published by
