@@ -22,23 +22,20 @@
 import os
 import wx
 import time
-#import music_score_creator
-#from music_score_creator.sound import *
-from sound import *
-
-def initialize():
-    # Create all the variables.
-    global audioData
-    audioData = AudioData()
+import sound
+import wave
+import pygame
 
 
-class MainWindow(wx.Frame):
+
+class MainWindow():
     def __init__(self, parent, title):
-        wx.Frame.__init__(self, parent, style=wx.DEFAULT_FRAME_STYLE ^ wx.RESIZE_BORDER, title=title, size=(300,350))
-        initialize()
+        self.frame = wx.Frame(parent, style=wx.DEFAULT_FRAME_STYLE ^ wx.RESIZE_BORDER, title=title, size=(300,350))
+        # WHY FUCKING GLOBALS? GLOBALS VARIABLES ARE EVIL!
         global menuSave, menuPlay, soundfile, audioData, menuAudioProcess
         global sounddirectory, tRecord, tTunning, menuPlayMidi
-        panel = wx.Panel(self)
+        audioData = sound.AudioData()
+        panel = wx.Panel(self.frame)
 
         # Setting up the menu.
         filemenu = wx.Menu()
@@ -71,23 +68,23 @@ class MainWindow(wx.Frame):
         menuBar.Append(filemenu,"&File") 
         menuBar.Append(soundmenu, "&Sound")
         menuBar.Append(helpmenu, "&Help")
-        self.SetMenuBar(menuBar)  # Adding the MenuBar to the Frame content.
+        self.frame.SetMenuBar(menuBar)  # Adding the MenuBar to the Frame content.
 
         # Set events of the menubar.
-        self.Bind(wx.EVT_MENU, self.OnAbout, menuAbout)
-        self.Bind(wx.EVT_MENU, self.OnExit, menuExit)
-        self.Bind(wx.EVT_MENU, self.OnRecord, menuRecord)
-        self.Bind(wx.EVT_MENU, self.OnPlay, menuPlay)
-        self.Bind(wx.EVT_MENU, self.OnAudioProcess, menuAudioProcess)
-        self.Bind(wx.EVT_MENU, self.OnOpen, menuOpen)
-        self.Bind(wx.EVT_MENU, self.OnSave, menuSave)
-        self.Bind(wx.EVT_MENU, self.OnPlayMidi, menuPlayMidi)
+        self.frame.Bind(wx.EVT_MENU, self.onAbout, menuAbout)
+        self.frame.Bind(wx.EVT_MENU, self.onExit, menuExit)
+        self.frame.Bind(wx.EVT_MENU, self.onRecord, menuRecord)
+        self.frame.Bind(wx.EVT_MENU, self.onPlay, menuPlay)
+        self.frame.Bind(wx.EVT_MENU, self.onAudioProcess, menuAudioProcess)
+        self.frame.Bind(wx.EVT_MENU, self.onOpen, menuOpen)
+        self.frame.Bind(wx.EVT_MENU, self.onSave, menuSave)
+        self.frame.Bind(wx.EVT_MENU, self.onPlayMidi, menuPlayMidi)
 
 
         # Creating the toolbar
         vbox = wx.BoxSizer(wx.VERTICAL)
         global mainToolbar
-        mainToolbar = wx.ToolBar(self)
+        mainToolbar = wx.ToolBar(self.frame)
         toolbarOpen = mainToolbar.AddLabelTool(wx.ID_OPEN, '', wx.Bitmap('images/open32.png'))
         toolbarSave = mainToolbar.AddLabelTool(wx.ID_SAVE, '', wx.Bitmap('images/save32.png'))
         mainToolbar.AddSeparator()
@@ -104,69 +101,65 @@ class MainWindow(wx.Frame):
 
         # Set events of the toolbar
 
-        self.Bind(wx.EVT_MENU, self.OnOpen, toolbarOpen)
-        self.Bind(wx.EVT_MENU, self.OnRecord, toolbarRecord)
-        self.Bind(wx.EVT_MENU, self.OnPlay, toolbarPlay)
-        self.Bind(wx.EVT_MENU, self.OnAudioProcess, toolbarAudioProcess)
-        self.Bind(wx.EVT_MENU, self.OnSave, toolbarSave)
-        self.Bind(wx.EVT_MENU, self.OnPlayMidi, toolbarPlayMidi)
+        self.frame.Bind(wx.EVT_MENU, self.onOpen, toolbarOpen)
+        self.frame.Bind(wx.EVT_MENU, self.onRecord, toolbarRecord)
+        self.frame.Bind(wx.EVT_MENU, self.onPlay, toolbarPlay)
+        self.frame.Bind(wx.EVT_MENU, self.onAudioProcess, toolbarAudioProcess)
+        self.frame.Bind(wx.EVT_MENU, self.onSave, toolbarSave)
+        self.frame.Bind(wx.EVT_MENU, self.onPlayMidi, toolbarPlayMidi)
 
         vbox.Add(mainToolbar, 0, wx.EXPAND)
 
         # 
 
         instruments = ["Piano", "Clarinet", "Flute", "Trumpet", "Alto Saxo"]
-        wx.StaticText(self, label=("Instrument"), pos=(10, 74))
-        cb_instrument = wx.ComboBox(self, value=("Piano"), pos=(169, 70), size=(120, 28), choices=instruments, style=wx.CB_READONLY)
+        wx.StaticText(self.frame, label=("Instrument"), pos=(10, 74))
+        cb_instrument = wx.ComboBox(self.frame, value=("Piano"), pos=(169, 70), size=(120, 28), choices=instruments, style=wx.CB_READONLY)
 
         tempos = ['60', '90', '120', '150']
-        wx.StaticText(self, label=("Tempo"), pos=(10, 114))
-        cb_tempo = wx.ComboBox(self, value=('60'), pos=(209, 110), size=(80, 28), choices=tempos, 
+        wx.StaticText(self.frame, label=("Tempo"), pos=(10, 114))
+        cb_tempo = wx.ComboBox(self.frame, value=('60'), pos=(209, 110), size=(80, 28), choices=tempos, 
             style=wx.CB_READONLY)
 
-        wx.StaticLine(self, pos=(0, 50), size=(300,1))
+        wx.StaticLine(self.frame, pos=(0, 50), size=(300,1))
 
-        tRecord = wx.TextCtrl(self,-1, pos=(209, 150), value="2")
-        wx.StaticText(self, label=("Recording time (seconds)"), pos=(10, 154))
-        #wx.StaticText(self, label=("seconds"), pos=(210, 114))
+        tRecord = wx.TextCtrl(self.frame,-1, pos=(209, 150), value="2")
+        wx.StaticText(self.frame, label=("Recording time (seconds)"), pos=(10, 154))
+        #wx.StaticText(self.frame, label=("seconds"), pos=(210, 114))
 
         measures = ['2/4', '3/4', '4/4']
-        wx.StaticText(self, label=("Measure"), pos=(10, 194))
-        cb_measure = wx.ComboBox(self, value=('4/4'), pos=(209, 190), size=(80, 28), choices=measures, 
+        wx.StaticText(self.frame, label=("Measure"), pos=(10, 194))
+        cb_measure = wx.ComboBox(self.frame, value=('4/4'), pos=(209, 190), size=(80, 28), choices=measures, 
             style=wx.CB_READONLY)
 
-        tTunning = wx.TextCtrl(self, -1, pos=(209, 230), value="440")
-        wx.StaticText(self, label=("Tuning"), pos=(10, 234))
+        tTunning = wx.TextCtrl(self.frame, -1, pos=(209, 230), value="440")
+        wx.StaticText(self.frame, label=("Tuning"), pos=(10, 234))
 
         notes = ['Semibreve', 'Minim', 'Crotchet', 'Quaver', 'Semiquaver']
-        tMinimumNote = wx.StaticText(self, label=("Minimum note"), pos=(10, 274))
-        cb_minimumNote = wx.ComboBox(self, value=('Semiquaver'), pos=(159, 270), size=(130, 28), choices=notes)
+        tMinimumNote = wx.StaticText(self.frame, label=("Minimum note"), pos=(10, 274))
+        cb_minimumNote = wx.ComboBox(self.frame, value=('Semiquaver'), pos=(159, 270), size=(130, 28), choices=notes)
 
-        cb_midi = wx.CheckBox(self, label="Generate MIDI", pos=(10, 314))
+        cb_midi = wx.CheckBox(self.frame, label="Generate MIDI", pos=(10, 314))
 
 
         # Events of the block
 
-        self.Bind(wx.EVT_COMBOBOX, self.OnTempo, cb_tempo)
-        self.Bind(wx.EVT_COMBOBOX, self.OnMeasure, cb_measure)
-        self.Bind(wx.EVT_CHECKBOX, self.OnMidi, cb_midi)
-        self.Bind(wx.EVT_COMBOBOX, self.OnInstrument, cb_instrument)
-        self.Bind(wx.EVT_COMBOBOX, self.OnMinimumNote, cb_minimumNote)
-        #self.Bind(wx.Ev)
+        self.frame.Bind(wx.EVT_COMBOBOX, self.onTempo, cb_tempo)
+        self.frame.Bind(wx.EVT_COMBOBOX, self.onMeasure, cb_measure)
+        self.frame.Bind(wx.EVT_CHECKBOX, self.onMidi, cb_midi)
+        self.frame.Bind(wx.EVT_COMBOBOX, self.onInstrument, cb_instrument)
+        self.frame.Bind(wx.EVT_COMBOBOX, self.onMinimumNote, cb_minimumNote)
 
-        self.SetSizer(vbox)
+        self.frame.SetSizer(vbox)
 
-        self.Show(True)
+        self.frame.Show(True)
 
-    def OnOpen(self, e):
+    def onOpen(self, e):
         global soundfile, audioData, sounddirectory
-        self.dirname = '.'
-        dlg = wx.FileDialog(self, "Choose a file", self.dirname, "", "*.wav", wx.OPEN)
+        dlg = wx.FileDialog(self.frame, "Choose a file", '.', "", "*.wav", wx.OPEN)
         if dlg.ShowModal() == wx.ID_OK:
-            self.filename = dlg.GetFilename()
-            self.dirname = dlg.GetDirectory()
-            sounddirectory = self.dirname+"/"+self.filename
-            soundfile = wave.open(self.dirname+"/"+self.filename, 'rb')
+            sounddirectory = dlg.getPath()
+            soundfile = wave.open(dlg.getPath(), 'rb')
             mainToolbar.EnableTool(wx.ID_SAVE, True)
             mainToolbar.EnableTool(6001, True)
             mainToolbar.EnableTool(6002, True)
@@ -176,13 +169,12 @@ class MainWindow(wx.Frame):
             
         dlg.Destroy()
 
-    def OnRecord(self, e):
+    def onRecord(self, e):
         global soundfile,menuSave, menuPlay, menuAudioProcess, audioData, sounddirectory
         global tRecord
         mainToolbar.EnableTool(5990, False)
-        #time.sleep(3)
         audioData.record_seconds = int(tRecord.GetValue())
-        (soundfile, frames, sounddirectory) = record(audioData)
+        (soundfile, frames, sounddirectory) = sound.record(audioData)
         audioData.frames = frames
         mainToolbar.EnableTool(5990, True)
         mainToolbar.EnableTool(wx.ID_SAVE, True)
@@ -192,11 +184,11 @@ class MainWindow(wx.Frame):
         menuPlay.Enable(True)
         menuAudioProcess.Enable(True)
 
-    def OnAudioProcess(self, e):
+    def onAudioProcess(self, e):
         #Add interaction to save the file. In test, only the path to the file to process
         global sounddirectory, tTunning, audioData, menuPlayMidi
-        audioData = updateConversionList(audioData, int(tTunning.GetValue()))
-        audioProcessing(sounddirectory, audioData)
+        audioData = sound.updateConversionList(audioData, int(tTunning.GetValue()))
+        sound.audioProcessing(sounddirectory, audioData)
         if audioData.midi == 1:
             mainToolbar.EnableTool(6003, True)
             menuPlayMidi.Enable(True)
@@ -204,37 +196,36 @@ class MainWindow(wx.Frame):
             mainToolbar.EnableTool(6003, False)
             menuPlayMidi.Enable(False)
 
-    def OnSave(self, e):
+    def onSave(self, e):
         global soundfile, audioData
-        self.dirname = '.'
-        dlg = wx.FileDialog(self, "Save audio", self.dirname, "", "*.wav", wx.SAVE)
+        dlg = wx.FileDialog(self.frame, "Save audio", '.', "", "*.wav", wx.SAVE)
         if dlg.ShowModal() == wx.ID_OK:
-            self.filename = dlg.GetFilename()
-            self.dirname = dlg.GetDirectory()
-            save(self.dirname, self.filename, soundfile, audioData)
+            filename = dlg.GetFilename()
+            dirname = dlg.GetDirectory()
+            sound.save(dirname, filename, audioData)
         dlg.Destroy()
 
-    def OnAbout(self, e):
-        dlg = wx.MessageDialog( self, "An attempt of doing a music score creator.\nVersion 0.9beta - 2014\nCreated by Jose Carlos M. Aragon.\nYou can contact me via twitter: @Montagon.", "About Music score creator", wx.OK)
+    def onAbout(self, e):
+        dlg = wx.MessageDialog( self.frame, "An attempt of doing a music score creator.\nVersion 0.9beta - 2014\nCreated by Jose Carlos M. Aragon.\nModified by Troido.\n", "About Music score creator", wx.OK)
         dlg.ShowModal()
         dlg.Destroy()
 
-    def OnPlay(self, e):
+    def onPlay(self, e):
         global soundfile, audioData, sounddirectory
-        play(soundfile, audioData, sounddirectory)
+        sound.play(sounddirectory, audioData)
 
-    def OnExit(self, e):
-        self.Close(True)
+    def onExit(self, e):
+        self.frame.Close(True)
 
-    def OnTempo(self, e):
+    def onTempo(self, e):
         global audioData
         audioData.quarter_note_minute = int(e.GetString())
 
-    def OnMeasure(self, e):
+    def onMeasure(self, e):
         global audioData
         audioData.measure = e.GetString()
 
-    def OnMidi(self, e):
+    def onMidi(self, e):
         global audioData
         sender = e.GetEventObject()
         isChecked = sender.GetValue()
@@ -244,17 +235,17 @@ class MainWindow(wx.Frame):
         else:
             audioData.midi = 0
 
-    def OnPlayMidi(self, e):
+    def onPlayMidi(self, e):
         global audioData
         pygame.mixer.init(audioData.rate, audioData.format, audioData.channels, audioData.chunk)
         pygame.mixer.music.load("score.midi")
         pygame.mixer.music.play()
 
-    def OnInstrument(self, e):
+    def onInstrument(self, e):
         global audioData
         audioData.instrument = e.GetString()
 
-    def OnMinimumNote(self, e):
+    def onMinimumNote(self, e):
         global audioData
         note_conversion =  {"Semibreve": 16,
                             "Minim": 8,
@@ -264,7 +255,7 @@ class MainWindow(wx.Frame):
         audioData.minimum_note = note_conversion[e.GetString()]
 
 
-
-app = wx.App(False)
-frame = MainWindow(None, "Music score creator")
-app.MainLoop()
+if __name__ == "__main__":
+    app = wx.App(False)
+    frame = MainWindow(None, "Music score creator")
+    app.MainLoop()
