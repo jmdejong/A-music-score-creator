@@ -20,28 +20,12 @@ import pyaudio
 import wave
 import time
 import tempfile
-from pylab import*
+import math
+#from pylab import*
 from scipy.io import wavfile
 import numpy
-from frequency import *
-
-
-# Class that stores values for the proper treatment of time,
-# recording settings and more.
-class AudioData():
-    def __init__(self):
-        self.channels = 1
-        self.format = pyaudio.paInt16
-        self.rate = 8000
-        self.frames = 0
-        self.chunk = 2000
-        self.record_seconds = 1
-        self.sample_size = 0
-        self.quarter_note_minute = 60 
-        self.measure = '4/4'
-        self.midi = 0
-        self.instrument = "Piano"
-        self.minimum_note = 1
+#from frequency import *
+import frequency
 
 
 instrument_conversion = {"Clarinet": "a b", 
@@ -57,7 +41,7 @@ def tempo(audioData):
 
     # Determining the size of the chunk. 
     # That is, the number of semiquaver for second
-    audioData.chunk = int(ceil(2530 - 200*semiquaver))
+    audioData.chunk = int(math.ceil(2530 - 200*semiquaver))
 
     return audioData
 
@@ -233,7 +217,7 @@ def preprocessingFreqs(list_of_freq, audioData):
     # Transform the original freq to the note
     list_ = []
     for i in list_of_freq:
-        list_.append( getNote( getNotefromFrequency(i) ) )
+        list_.append( frequency.getNoteName( frequency.getTone(i) ) )
 
     # Remove the silent notes at the begin of the audio
     while (len(list_) > 0) and (list_[0] == 'r'):
@@ -367,7 +351,7 @@ def writeFile(final_list, audioData):
     f.write("\\bar \"|.\"\n\t\t}")
     f.write("\n\t}")
 
-    if audioData.midi == 1:
+    if audioData.isMidi:
         f.write("\n\t\\layout{}")
         f.write("\n\t\\midi{}")
 
